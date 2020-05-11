@@ -1,0 +1,133 @@
+package cvrp_population;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
+
+public abstract class Util {
+	
+	private static HashMap<Integer, HashMap<Integer, Double>> distances;
+	
+	public static HashMap<Integer, HashMap<Integer, Double>> getDistances() {
+		return distances;
+	}
+	
+	public static ArrayList<Location> readData(String pathFile) {
+		ArrayList<Location> locations = new ArrayList<Location>();				
+		int[] locationValues = new int[4];
+		boolean firstLine = true;
+		try {
+			List<String> lines = Files.readAllLines(Paths.get(pathFile));
+			for (String line : lines) {
+				if(firstLine) {
+					firstLine = false;
+					continue;
+				}
+				int count = 0;
+				for (String data : line.split(";")) {
+					locationValues[count] = Integer.valueOf(data);
+					count++;
+				}
+				Location l = new Location(locationValues[0], locationValues[1], locationValues[2], locationValues[3]);
+				locations.add(l);
+			}
+		} catch (NumberFormatException e) {
+			System.err.print(e.getMessage());
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
+		
+		initDistances(locations);
+		return locations;
+	}
+	
+	private static void initDistances(ArrayList<Location> locations) {
+    	distances = new HashMap<>();
+    	int nbCustomers = locations.size();
+    	for (int i = 0; i < nbCustomers - 1; i++) {
+            for (int j = i + 1; j < nbCustomers; j++) {
+            	int xDiff = locations.get(i).getX() - locations.get(j).getX();
+                int yDiff = locations.get(i).getY() - locations.get(j).getY();
+                double distance = Math.round(Math.sqrt(Math.pow(xDiff,  2) + Math.pow(yDiff,  2)));
+                int iId = locations.get(i).getId();
+                int jId = locations.get(j).getId();
+                addDistance(iId, jId, distance);
+                addDistance(jId, iId, distance);
+            }
+        }
+    }
+    
+    private static void addDistance(int iId, int jId, double distance) {
+    	if(distances.containsKey(iId)) {
+        	distances.get(iId).put(jId, distance);
+        } else {
+        	HashMap<Integer, Double> jMap = new HashMap<>();
+        	jMap.put(jId, distance);
+        	distances.put(iId, jMap);
+        }
+    }
+	
+	public static void drawGraphs(String title, String parametersDesc, HashMap<String, Vehicle[]> routesList) {
+		JFrame frame = new JFrame(title);
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createTitledBorder(parametersDesc));
+        for (Map.Entry<String, Vehicle[]> entry : routesList.entrySet()) {
+        	JPanel graph = new DrawGraph(entry.getValue());
+        	Border border = BorderFactory.createTitledBorder(entry.getKey());
+        	graph.setBorder(border);
+        	mainPanel.add(graph);
+        }
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
+        frame.add(mainPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+	}
+	
+	public static void drawLineCharts(String title, String parametersDesc, HashMap<String, ArrayList<Double>> bestCostsHistories) {
+		JFrame frame = new JFrame(title);
+		JPanel mainPanel = new JPanel();
+		mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createTitledBorder(parametersDesc));
+        for (Map.Entry<String, ArrayList<Double>> entry : bestCostsHistories.entrySet()) {
+        	DrawLineChart lineChart = new DrawLineChart(entry.getValue());
+        	lineChart.setPreferredSize(new Dimension(900, 650));
+        	Border border = BorderFactory.createTitledBorder(entry.getKey());
+        	lineChart.setBorder(border);
+        	mainPanel.add(lineChart);
+        }
+        frame.add(mainPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+	
+	public static Vehicle[] createDeepCopy(Vehicle[] source) {
+    	Vehicle[] copy = new Vehicle[source.length];
+        for (int i = 0; i < source.length; i++) {
+        	copy[i] = new Vehicle(source[i]);
+        }
+        return copy;
+    }
+	
+	public static ArrayList<Location> createDeepCopy(ArrayList<Location> source) {
+		ArrayList<Location> copy = new ArrayList<Location>();
+		for (Location l : source) {
+			copy.add(new Location(l));
+		}
+        return copy;
+    }
+}
