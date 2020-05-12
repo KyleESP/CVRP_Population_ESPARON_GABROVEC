@@ -1,6 +1,7 @@
 package cvrp_population;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 public class Genetic {
@@ -49,13 +50,13 @@ public class Genetic {
 	
 	private void initPopulation() {
 		for (int i = 0; i < nbIndividuals; i++) {
-			population.add(new ArrayList<>());
-		}
-		for (ArrayList<Vehicle> vehicles : population) {
+			ArrayList<Vehicle> vehicles = new ArrayList<>();
+			population.add(vehicles);
 	        int vIdx = 0;
 	        Vehicle v;
 	        ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
 	        Location depot = locationsCopy.get(0);
+	        Collections.shuffle(locationsCopy, new Random(i));
 	        while (hasAnUnroutedLocation(locationsCopy)) {
 	        	if (vIdx >= vehicles.size()) {
 	        		Vehicle newV = new Vehicle(maxCapacity);
@@ -64,13 +65,9 @@ public class Genetic {
 	        	}
 	        	v = vehicles.get(vIdx);
 	            Location choseLocation = null;
-	            double minCost = Double.POSITIVE_INFINITY;
 	            int currentLocationId = v.getCurrentLocationId();
-	            double dist;
 	            for(Location l : locationsCopy) {
-	            	if((currentLocationId != l.getId()) && !l.getIsRouted() && v.fits(l.getNbOrders()) 
-	            			&& minCost > (dist = Util.getDistances().get(currentLocationId).get(l.getId()))) {
-						minCost = dist;
+	            	if((currentLocationId != l.getId()) && !l.getIsRouted() && v.fits(l.getNbOrders())) {
 	                    choseLocation = l;
 	            	}
 	            }
@@ -89,6 +86,8 @@ public class Genetic {
 		cost = bestCost;
 		costsHistory = new ArrayList<>();
     	costsHistory.add(cost);
+    	//ArrayList<ArrayList<Vehicle>> otherIndividuals = getIndividuals(bestVehicles, nbIndividuals - 1);
+    	
     }
     
 	private boolean hasAnUnroutedLocation(ArrayList<Location> locations) {
@@ -134,8 +133,8 @@ public class Genetic {
 		return description;
 	}
     
-    protected ArrayList<ArrayList<Vehicle>> getNeighbors(ArrayList<Vehicle> vehicles) {
-		ArrayList<ArrayList<Vehicle>> neighbors = new ArrayList<>();
+    protected ArrayList<ArrayList<Vehicle>> getIndividuals(ArrayList<Vehicle> vehicles, int limit) {
+		ArrayList<ArrayList<Vehicle>> individuals = new ArrayList<>();
 		ArrayList<Location> routeFrom, routeTo;
 		int routeFromSize, routeToSize;
 		boolean isSameRoute;
@@ -152,20 +151,27 @@ public class Genetic {
 					if (totalLoading > (maxCapacity * 2)) {
 						continue;
 					} else if (totalLoading <= maxCapacity) {
-						neighbors.add(deleteOneRoute(vehicles, routeFrom, routeTo, vFromIdx, vToIdx));
+						individuals.add(deleteOneRoute(vehicles, routeFrom, routeTo, vFromIdx, vToIdx));
+						nbIndividuals++;
+						if (nbIndividuals == limit) {
+							return individuals;
+						}
 					}
 				}
 				for (int locFromIdx = 1; locFromIdx < routeFromSize - (isSameRoute ? 2 : 1); locFromIdx++) {
 					for (int locToIdx = (isSameRoute ? (locFromIdx + 1) : (locFromIdx == routeFromSize - 2 ? 1 : 0)); locToIdx < routeToSize - ((isSameRoute && locFromIdx == 1 || !isSameRoute && locFromIdx == routeFromSize - 2) ? 2 : 1); locToIdx++) {
 						ArrayList<Vehicle> newVehicles = isSameRoute ? swapTwoOpt(vehicles, vFromIdx, locFromIdx, locToIdx) : swapRoutes(vehicles, routeFrom, routeTo, vFromIdx, vToIdx, locFromIdx, locToIdx);
 						if (newVehicles != null) {
-							neighbors.add(newVehicles);
+							individuals.add(newVehicles);
+							if (nbIndividuals == limit) {
+								return individuals;
+							}
 						}
 					}
 				}
 			}
 		}
-		return neighbors;
+		return individuals;
 	}
     
 	private ArrayList<Vehicle> swapRoutes(ArrayList<Vehicle> vehicles, ArrayList<Location> routeFrom, ArrayList<Location> routeTo, int vFromIdx, int vToIdx, int locFromIdx, int locToIdx) {
@@ -267,5 +273,9 @@ public class Genetic {
         	routeString += "(" + route.get(i).getId() + ")" + ((i != routeSize - 1) ? " == " : "");
         }
     	return routeString;
+    }
+    
+    public ArrayList<ArrayList<Vehicle>> getPopulation() {
+    	return population;
     }
 }
