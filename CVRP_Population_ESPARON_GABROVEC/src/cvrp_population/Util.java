@@ -78,12 +78,12 @@ public abstract class Util {
         }
     }
 	
-	public static void drawGraphs(String title, String parametersDesc, HashMap<String, Vehicle[]> routesList) {
+	public static void drawGraphs(String title, String parametersDesc, HashMap<String, ArrayList<Vehicle>> routesList) {
 		JFrame frame = new JFrame(title);
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(BorderFactory.createTitledBorder(parametersDesc));
-        for (Map.Entry<String, Vehicle[]> entry : routesList.entrySet()) {
+        for (Map.Entry<String, ArrayList<Vehicle>> entry : routesList.entrySet()) {
         	JPanel graph = new DrawGraph(entry.getValue());
         	Border border = BorderFactory.createTitledBorder(entry.getKey());
         	graph.setBorder(border);
@@ -115,15 +115,15 @@ public abstract class Util {
         frame.setVisible(true);
     }
 	
-	public static Vehicle[] createDeepCopy(Vehicle[] source) {
-    	Vehicle[] copy = new Vehicle[source.length];
-        for (int i = 0; i < source.length; i++) {
-        	copy[i] = new Vehicle(source[i]);
+	public static ArrayList<Vehicle> createDeepCopyVehicles(ArrayList<Vehicle> source) {
+    	ArrayList<Vehicle> copy = new ArrayList<>();
+        for (Vehicle v : source) {
+        	copy.add(new Vehicle(v));
         }
         return copy;
     }
 	
-	public static ArrayList<Location> createDeepCopy(ArrayList<Location> source) {
+	public static ArrayList<Location> createDeepCopyLocations(ArrayList<Location> source) {
 		ArrayList<Location> copy = new ArrayList<Location>();
 		for (Location l : source) {
 			copy.add(new Location(l));

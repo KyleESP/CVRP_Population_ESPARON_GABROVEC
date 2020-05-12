@@ -19,9 +19,9 @@ public class DrawGraph extends JPanel {
     private Color labelColor = Color.RED;
     private Color bgColor = Color.WHITE;
     private int pointWidth = 10;
-    private Vehicle[] vehicles;
+    private ArrayList<Vehicle> vehicles;
     
-    public DrawGraph(Vehicle[] vehicles) {
+    public DrawGraph(ArrayList<Vehicle> vehicles) {
     	this.vehicles = vehicles;
         this.setPreferredSize(new Dimension(SIZE, SIZE));
     }
