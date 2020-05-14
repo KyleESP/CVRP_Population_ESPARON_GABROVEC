@@ -57,13 +57,9 @@ public abstract class Util {
     	int nbCustomers = locations.size();
     	for (int i = 0; i < nbCustomers - 1; i++) {
             for (int j = i + 1; j < nbCustomers; j++) {
-            	int xDiff = locations.get(i).getX() - locations.get(j).getX();
-                int yDiff = locations.get(i).getY() - locations.get(j).getY();
-                double distance = Math.round(Math.sqrt(Math.pow(xDiff,  2) + Math.pow(yDiff,  2)));
-                int iId = locations.get(i).getId();
-                int jId = locations.get(j).getId();
-                addDistance(iId, jId, distance);
-                addDistance(jId, iId, distance);
+                double distance = Math.sqrt(Math.pow(locations.get(i).getX() - locations.get(j).getX(), 2) + Math.pow(locations.get(i).getY() - locations.get(j).getY(), 2));
+                addDistance(locations.get(i).getId(), locations.get(j).getId(), distance);
+                addDistance(locations.get(j).getId(),locations.get(i).getId(), distance);
             }
         }
     }

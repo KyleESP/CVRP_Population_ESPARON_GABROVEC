@@ -125,53 +125,12 @@ public class Genetic {
 	}
 	
 	public String getInlineDescription() {
-		String description = "Coût final = " + bestCost;
+		String description = "Coût final = " + (double) Math.round(bestCost * 1000) / 1000;
 		description += " | Nb véhicules = " + bestVehicles.size() + " | ";
 		description += " | Nombre d'individus = " +  nbIndividuals;
 		description += " | Nombre de générations = " + nbGenerations;
 		description += " | Probabilité de croisement = " + pCross;
 		return description;
-	}
-    
-    protected ArrayList<ArrayList<Vehicle>> getIndividuals(ArrayList<Vehicle> vehicles, int limit) {
-		ArrayList<ArrayList<Vehicle>> individuals = new ArrayList<>();
-		ArrayList<Location> routeFrom, routeTo;
-		int routeFromSize, routeToSize;
-		boolean isSameRoute;
-		int totalLoading;
-		for (int vFromIdx = 0; vFromIdx < vehicles.size(); vFromIdx++) {
-			routeFrom = vehicles.get(vFromIdx).getRoute();
-			routeFromSize = routeFrom.size();
-			for (int vToIdx = vFromIdx; vToIdx < vehicles.size(); vToIdx++) {
-				routeTo = vehicles.get(vToIdx).getRoute();
-				routeToSize = routeTo.size();
-				isSameRoute = (vFromIdx == vToIdx);
-				if (!isSameRoute) {
-					totalLoading = vehicles.get(vFromIdx).getCurrentLoading() + vehicles.get(vToIdx).getCurrentLoading();
-					if (totalLoading > (maxCapacity * 2)) {
-						continue;
-					} else if (totalLoading <= maxCapacity) {
-						individuals.add(deleteOneRoute(vehicles, routeFrom, routeTo, vFromIdx, vToIdx));
-						nbIndividuals++;
-						if (nbIndividuals == limit) {
-							return individuals;
-						}
-					}
-				}
-				for (int locFromIdx = 1; locFromIdx < routeFromSize - (isSameRoute ? 2 : 1); locFromIdx++) {
-					for (int locToIdx = (isSameRoute ? (locFromIdx + 1) : (locFromIdx == routeFromSize - 2 ? 1 : 0)); locToIdx < routeToSize - ((isSameRoute && locFromIdx == 1 || !isSameRoute && locFromIdx == routeFromSize - 2) ? 2 : 1); locToIdx++) {
-						ArrayList<Vehicle> newVehicles = isSameRoute ? swapTwoOpt(vehicles, vFromIdx, locFromIdx, locToIdx) : swapRoutes(vehicles, routeFrom, routeTo, vFromIdx, vToIdx, locFromIdx, locToIdx);
-						if (newVehicles != null) {
-							individuals.add(newVehicles);
-							if (nbIndividuals == limit) {
-								return individuals;
-							}
-						}
-					}
-				}
-			}
-		}
-		return individuals;
 	}
     
 	private ArrayList<Vehicle> swapRoutes(ArrayList<Vehicle> vehicles, ArrayList<Location> routeFrom, ArrayList<Location> routeTo, int vFromIdx, int vToIdx, int locFromIdx, int locToIdx) {
@@ -243,9 +202,9 @@ public class Genetic {
         return newVehicles;
     }
 	
-	protected double objectiveFunction(ArrayList<Vehicle> vehicles) {
-    	double sumDist = 0;
-    	int sumVehicles = 0;
+	private double objectiveFunction(ArrayList<Vehicle> vehicles) {
+		double sumDist = 0;
+    	double sumVehicles = 0;
     	ArrayList<Location> route;
     	for(Vehicle v : vehicles) {
     		route = v.getRoute();
@@ -266,7 +225,7 @@ public class Genetic {
     	System.out.println("----------------------------------------------------------------------------------------------------");
     }
     
-    protected String getRouteString(ArrayList<Location> route) {
+    private String getRouteString(ArrayList<Location> route) {
     	int routeSize = route.size();
     	String routeString = "";
     	for (int i = 0; i < routeSize ; i++) {
