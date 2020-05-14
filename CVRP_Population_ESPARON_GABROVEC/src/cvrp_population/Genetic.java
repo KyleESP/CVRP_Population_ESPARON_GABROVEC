@@ -44,9 +44,52 @@ public class Genetic {
     }
 	
 	public void exec() {
-		displayDescription();
-	    displayBestSolution();
+		//displayDescription();
+		for (int i = 0; i < nbGenerations; i++) {
+			rouletteWheelReproduction();
+		}
+	    //displayBestSolution();
     }
+	
+	private void rouletteWheelReproduction() {
+		ArrayList<Double> costs = new ArrayList<>();
+		double total = 0;
+		for (ArrayList<Vehicle> individual : population) {
+			double cost = objectiveFunction(individual);
+			costs.add(cost);
+			total += cost;
+		}
+		ArrayList<double[]> rouletteWheel = new ArrayList<double[]>();
+		double p = 0;
+		for (int i = 0; i < costs.size() - 1; i++) {
+			double[] interval = new double[2];
+			interval[0] = p;
+			p += costs.get(i + 1) / total;
+			interval[1] = p;
+			rouletteWheel.add(interval);
+		}
+		rouletteWheel.add(new double[] {p, 1d});
+		
+		ArrayList<ArrayList<Vehicle>> nextPopulation = new ArrayList<>();
+		for (int i = 0; i < nbIndividuals; i++) {
+			p = rand.nextDouble();
+			nextPopulation.add(launchWheel(p, rouletteWheel));
+		}
+		population = nextPopulation;
+	}
+	
+	private ArrayList<Vehicle> launchWheel(Double p, ArrayList<double[]> rouletteWheel) {
+		double[] interval;
+		ArrayList<Vehicle> winner = null;
+		for (int j = 0; j < rouletteWheel.size(); j++) {
+			interval = rouletteWheel.get(j);
+			if (p >= interval[0] && p < interval[1]) {
+				winner = population.get(j);
+				break;
+			}
+		}
+		return winner;
+	}
 	
 	private void initPopulation() {
 		for (int i = 0; i < nbIndividuals; i++) {
@@ -216,12 +259,13 @@ public class Genetic {
     	return sumDist + sumVehicles;
     }
     
-    public void displayBestSolution() {
+    public void displaySolution(ArrayList<Vehicle> vehicles) {
+    	double cost = objectiveFunction(vehicles);
     	System.out.println("----------------------------------------------------------------------------------------------------");
-        for (int i = 0 ; i < bestVehicles.size() ; i++) {
-            System.out.println("Véhicule n°" + (i + 1) + " : " + getRouteString(bestVehicles.get(i).getRoute()));
+        for (int i = 0 ; i < vehicles.size() ; i++) {
+            System.out.println("Véhicule n°" + (i + 1) + " : " + getRouteString(vehicles.get(i).getRoute()));
         }
-        System.out.println("\nCoût de la solution : " + bestCost);
+        System.out.println("\nCoût de la solution : " + cost);
     	System.out.println("----------------------------------------------------------------------------------------------------");
     }
     
@@ -232,6 +276,14 @@ public class Genetic {
         	routeString += "(" + route.get(i).getId() + ")" + ((i != routeSize - 1) ? " == " : "");
         }
     	return routeString;
+    }
+    
+    public void displayPopulation(ArrayList<ArrayList<Vehicle>> population) {
+    	for (int i = 0; i < population.size(); i++) {
+    		System.out.println("Individu n°" + (i + 1));
+    		displaySolution(population.get(i));
+    		System.out.println();
+    	}
     }
     
     public ArrayList<ArrayList<Vehicle>> getPopulation() {

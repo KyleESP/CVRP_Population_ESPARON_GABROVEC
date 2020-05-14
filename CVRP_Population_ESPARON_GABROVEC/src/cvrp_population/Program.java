@@ -20,7 +20,7 @@ public class Program {
 	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE + ".txt");
 	    
 	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_CROSS);
-        //genetic.exec();
+        genetic.exec();
         String descTabu = "Algorithme génétique (" + genetic.getInlineDescription() + ")";
         routesList.put(descTabu, genetic.getBestVehicles());
         costsHistories.put(descTabu, genetic.getCostsHistory());
