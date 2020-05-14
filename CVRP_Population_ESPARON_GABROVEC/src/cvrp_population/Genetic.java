@@ -71,6 +71,7 @@ public class Genetic {
 		rouletteWheel.add(new double[] {p, 1d});
 		
 		ArrayList<ArrayList<Vehicle>> nextPopulation = new ArrayList<>();
+		// Launch wheel nbindividuals times to create the nextPopulation
 		for (int i = 0; i < nbIndividuals; i++) {
 			p = rand.nextDouble();
 			nextPopulation.add(launchWheel(p, rouletteWheel));
