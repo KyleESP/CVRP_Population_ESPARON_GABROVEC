@@ -10,6 +10,7 @@ public class Genetic {
 	private int nbIndividuals;
 	private int nbBest;
 	private double pCross;
+	private int nbPointsCross;
 	private int maxCapacity;
     private int nbVehicles;
 	private ArrayList<Location> locations;
@@ -19,13 +20,14 @@ public class Genetic {
     private ArrayList<Double> costsHistory;
 	private Random rand;
 	
-	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pCross) {
+	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pCross, int nbPointsCross) {
 		this.nbVehicles = nbVehicles;
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
     	this.nbBest = nbBest;
     	this.pCross = pCross;
+    	this.nbPointsCross = nbPointsCross;
     	population = new ArrayList<ArrayList<Vehicle>>(nbIndividuals);
     	this.locations = Util.createDeepCopyLocations(locations);
     	rand = new Random();
@@ -53,8 +55,8 @@ public class Genetic {
 			ArrayList<ArrayList<Vehicle>> reproductedPopulation = rouletteWheelReproduction();
 			bestSolutionsReproduction();
 			for (int j = nbBest + 1; j < nbIndividuals; j++) {
-				/*ArrayList<ArrayList<Vehicle>> newPopulation = (rand.nextDouble() < pCross) ? crossover(reproductedPopulation) : mutation(reproductedPopulation);
-				population.addAll(newPopulation);*/
+				ArrayList<ArrayList<Vehicle>> newPopulation = (rand.nextDouble() < pCross) ? crossover(reproductedPopulation) : mutation(reproductedPopulation);
+				population.addAll(newPopulation);
 			}
 			updateBestSolution();
 		}
@@ -62,7 +64,48 @@ public class Genetic {
     }
 	
 	private ArrayList<ArrayList<Vehicle>> crossover(ArrayList<ArrayList<Vehicle>> population) {
+		for (int i = 0; i < population.size() - 1; i++) {
+			ArrayList<Location> allLocations1 = getLocations(population.get(i));
+			ArrayList<Location> allLocations2 = getLocations(population.get(i + 1));
+			ArrayList<ArrayList<Location>> chunckedLocations1 = chunkList(allLocations1);
+			ArrayList<ArrayList<Location>> chunckedLocations2 = chunkList(allLocations2);
+			
+			int maxSize = Math.max(chunckedLocations1.size(), chunckedLocations2.size());
+			for (int j = 1; j < maxSize; j += 2) {
+				ArrayList<Location> tmpLocations1 = (j < chunckedLocations1.size()) ? chunckedLocations1.get(j) : null;
+				if (j < chunckedLocations2.size()) {
+					chunckedLocations1.set(j, chunckedLocations2.get(j));
+				} else {
+					chunckedLocations1.remove(j);
+				}
+				if (tmpLocations1 != null) {
+					chunckedLocations2.set(j, tmpLocations1);
+				} else {
+					chunckedLocations2.remove(j);
+				}
+			}
+		}
 		return null;
+	}
+	
+	private ArrayList<Location> getLocations(ArrayList<Vehicle> individual) {
+		ArrayList<Location> locations = new ArrayList<>();
+		for (Vehicle v : individual) {
+			for (Location l : v.getRoute()) {
+				locations.add(l);
+			}
+		}
+		return locations;
+	}
+	
+	private <T> ArrayList<ArrayList<T>> chunkList(ArrayList<T> list) {
+		int listSize = list.size();
+	    ArrayList<ArrayList<T>> chunkList = new ArrayList<>(list.size() / nbPointsCross);
+	    for (int i = 0; i < list.size(); i += nbPointsCross) {
+	    	ArrayList<T> l = new ArrayList<>(list.subList(i, i + nbPointsCross >= listSize ? listSize : i + nbPointsCross));
+	        chunkList.add(l);
+	    }
+	    return chunkList;
 	}
 	
 	private ArrayList<ArrayList<Vehicle>> mutation(ArrayList<ArrayList<Vehicle>> population) {
