@@ -119,6 +119,14 @@ public abstract class Util {
         return copy;
     }
 	
+	public static ArrayList<ArrayList<Vehicle>> createDeepCopyPopulation(ArrayList<ArrayList<Vehicle>> source) {
+    	ArrayList<ArrayList<Vehicle>> copy = new ArrayList<>();
+        for (ArrayList<Vehicle> vs : source) {
+        	copy.add(createDeepCopyVehicles(vs));
+        }
+        return copy;
+    }
+	
 	public static ArrayList<Location> createDeepCopyLocations(ArrayList<Location> source) {
 		ArrayList<Location> copy = new ArrayList<Location>();
 		for (Location l : source) {

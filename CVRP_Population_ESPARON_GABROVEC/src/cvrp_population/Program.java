@@ -12,6 +12,7 @@ public class Program {
 	
 	private static final long NB_GENERATIONS = 100;
 	private static final int NB_INDIVIDUALS = 6;
+	private static final int NB_BEST = 3;
 	private static final double P_CROSS = 0.05;
 	
 	public static void main(String[] args) {
@@ -19,15 +20,15 @@ public class Program {
 		HashMap<String, ArrayList<Double>> costsHistories = new HashMap<>();
 	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE + ".txt");
 	    
-	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_CROSS);
+	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, NB_BEST, P_CROSS);
         genetic.exec();
         String descTabu = "Algorithme génétique (" + genetic.getInlineDescription() + ")";
         routesList.put(descTabu, genetic.getBestVehicles());
         costsHistories.put(descTabu, genetic.getCostsHistory());
         
-        String parametersDesc = "Nombre de véhicules : " + NB_VEHICLES + ", Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
+        /*String parametersDesc = "Nombre de véhicules : " + NB_VEHICLES + ", Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
         Util.drawGraphs("Graphes CVRP Voisinage", parametersDesc, routesList);
-        Util.drawLineCharts("Line charts CVRP Voisinage", parametersDesc, costsHistories);
+        Util.drawLineCharts("Line charts CVRP Voisinage", parametersDesc, costsHistories);*/
     }
 
 }
