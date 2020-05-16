@@ -51,12 +51,38 @@ public class Genetic {
 		//displayDescription();
 		for (int i = 0; i < nbGenerations; i++) {
 			ArrayList<Vehicle> p1 = tournament(3);
-			ArrayList<Vehicle> p2 = tournament(2);
+			ArrayList<Vehicle> p2 = tournament(3);
 			ArrayList<Vehicle> c = hGreXCrossover(p1, p2);
+			setSimilarIndividual(c);
+			//TODO
 			updateBestSolution();
 		}
 	    //displayBestSolution();
     }
+	
+	private void setSimilarIndividual(ArrayList<Vehicle> individual) {
+		double indCost = objectiveFunction(individual);
+		double currIndCost;
+		boolean indCostBetter;
+		boolean hasSimilar = false;
+		for (ArrayList<Vehicle> currInd : population) {
+			currIndCost = objectiveFunction(currInd);
+			indCostBetter = currIndCost < indCost;
+			if (Math.abs(currIndCost - indCost) / (indCostBetter ? currIndCost : indCost) < 0.01) {
+				if (indCostBetter) {
+					population.remove(currInd);
+					population.add(individual);
+				}
+				hasSimilar = true;
+				break;
+			}
+		}
+		if (!hasSimilar) {
+			ArrayList<Vehicle> badIndividual = tournament(2);
+			population.remove(badIndividual);
+			population.add(individual);
+		}
+	}
 	
 	private ArrayList<Vehicle> tournament(int nbParticipants) {
 		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants);
@@ -175,6 +201,7 @@ public class Genetic {
 		}
 		return edgesCosts;
 	}
+	
 	private ArrayList<Location> getLocations(ArrayList<Vehicle> individual) {
 		ArrayList<Location> locations = new ArrayList<>();
 		for (Vehicle v : individual) {
