@@ -10,10 +10,10 @@ public class Program {
 	private static final int NB_VEHICLES = 20;
 	private static final int MAX_VEHICLES_CAPACITY = 100;
 	
-	private static final long NB_GENERATIONS = 100;
-	private static final int NB_INDIVIDUALS = 6;
+	private static final long NB_GENERATIONS = 600;
+	private static final int NB_INDIVIDUALS = 30;
 	private static final int NB_BEST = 3;
-	private static final double P_CROSS = 0.999999;
+	private static final double P_CROSS = 0.99999999999999999;
 	private static final int NB_POINTS_CROSS = 3;
 	
 	public static void main(String[] args) {

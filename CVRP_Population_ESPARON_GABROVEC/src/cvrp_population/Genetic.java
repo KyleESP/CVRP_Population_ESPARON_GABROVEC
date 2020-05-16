@@ -2,7 +2,10 @@ package cvrp_population;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Genetic {
 	
@@ -48,118 +51,139 @@ public class Genetic {
     }
 	
 	public void exec() {
+		hGreXCrossover(population.get(1), population.get(2));
+		System.exit(0);
 		bestCost = Double.POSITIVE_INFINITY;
 		updateBestSolution();
 		//displayDescription();
 		for (int i = 0; i < nbGenerations; i++) {
-			ArrayList<ArrayList<Vehicle>> reproductedPopulation = rouletteWheelReproduction();
-			bestSolutionsReproduction();
-			for (int j = nbBest + 1; j < nbIndividuals; j++) {
-				ArrayList<ArrayList<Vehicle>> newPopulation = (rand.nextDouble() < pCross) ? crossover(reproductedPopulation) : mutation(reproductedPopulation);
-				population.addAll(newPopulation);
-			}
+			ArrayList<ArrayList<Vehicle>> populationTournament = tournament();
+			ArrayList<Vehicle> p1 = populationTournament.get(0);
+			ArrayList<Vehicle> p2 = populationTournament.get(1);
+			ArrayList<Vehicle> c = hGreXCrossover(p1, p2);
 			updateBestSolution();
 		}
 	    //displayBestSolution();
     }
 	
-	private ArrayList<ArrayList<Vehicle>> crossover(ArrayList<ArrayList<Vehicle>> population) {
-		for (int i = 0; i < population.size() - 1; i++) {
-			ArrayList<Location> allLocations1 = getLocations(population.get(i));
-			ArrayList<Location> allLocations2 = getLocations(population.get(i + 1));
-			ArrayList<ArrayList<Location>> chunckedLocations1 = chunkList(allLocations1);
-			ArrayList<ArrayList<Location>> chunckedLocations2 = chunkList(allLocations2);
-			
-			int maxSize = Math.max(chunckedLocations1.size(), chunckedLocations2.size());
-			for (int j = 1; j < maxSize; j += 2) {
-				ArrayList<Location> tmpLocations1 = (j < chunckedLocations1.size()) ? chunckedLocations1.get(j) : null;
-				if (j < chunckedLocations2.size()) {
-					chunckedLocations1.set(j, chunckedLocations2.get(j));
-				} else {
-					chunckedLocations1.remove(j);
+	private ArrayList<ArrayList<Vehicle>> tournament() {
+		ArrayList<ArrayList<Vehicle>> newPopulation = new ArrayList<>();
+		ArrayList<ArrayList<Vehicle>> populationCopy = Util.createDeepCopyPopulation(population);
+		int populationSize = populationCopy.size();
+		int idxIdv1, idxIdv2;
+		boolean bestIdvWin;
+		double p = 0.85;
+		ArrayList<Vehicle> idv1, idv2;
+		while (!populationCopy.isEmpty()) {
+			if (populationCopy.size() == 1) {
+				newPopulation.add(populationCopy.get(0));
+				break;
+			}
+			idxIdv1 = rand.nextInt(populationSize);
+			idv1 = populationCopy.get(idxIdv1);
+			populationCopy.remove(idxIdv1);
+			idxIdv2 = rand.nextInt(populationSize);
+			idv2 = populationCopy.get(idxIdv2);
+			populationCopy.remove(idxIdv2);
+			bestIdvWin = rand.nextDouble() < p;
+			if (objectiveFunction(idv1) <= objectiveFunction(idv2)) {
+				newPopulation.add(bestIdvWin ? idv1 : idv2);
+			} else {
+				newPopulation.add(bestIdvWin ? idv2 : idv1);
+			}
+		}
+		return newPopulation;
+	}
+	
+	private ArrayList<Vehicle> hGreXCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {
+		ArrayList<Location> p1Locations = getLocations(p1);
+		HashMap<int[], Double> pCosts = getEdgesCosts(p1Locations);
+		ArrayList<Location> p2Locations = getLocations(p2);
+		pCosts.putAll(getEdgesCosts(p2Locations));
+		ArrayList<Integer> child = new ArrayList<>();
+		child.add(p1Locations.get(0).getId());
+		int lastLocId = p1Locations.get(1).getId();
+		child.add(lastLocId);
+		Double min;
+		int[] minEdge;
+		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
+		while (child.size() < p1Locations.size()) {
+			min = Double.POSITIVE_INFINITY;
+			minEdge = null;
+			for (Map.Entry<int[], Double> me : pCosts.entrySet()) {
+				if (me.getKey()[0] == lastLocId && !child.contains(me.getKey()[1]) && me.getValue() < min) {
+					minEdge = me.getKey();
+					min = me.getValue();
 				}
-				if (tmpLocations1 != null) {
-					chunckedLocations2.set(j, tmpLocations1);
-				} else {
-					chunckedLocations2.remove(j);
+	        }
+			if (minEdge == null) {
+				Double distance;
+				for (Location l : p1Locations) {
+					if (!child.contains(l.getId()) && (distance = distances.get(lastLocId).get(l.getId())) < min) {
+						minEdge = new int[] {lastLocId, l.getId()};
+						min = distance;
+					}
 				}
+			}
+			lastLocId = minEdge[1];
+			child.add(lastLocId);
+		}
+		ArrayList<Vehicle> newChild = new ArrayList<>();
+		Vehicle v = new Vehicle(maxCapacity);
+		Location depot = getLocationById(0);
+		v.routeLocation(depot);
+		for (int i = 0; i < child.size(); i++) {
+			if (!v.routeLocation(getLocationById(child.get(i)))) {
+				v.routeLocation(depot);
+				newChild.add(v);
+				v = new Vehicle(maxCapacity);
+				v.routeLocation(depot);
+				v.routeLocation(getLocationById(child.get(i)));
+			} else if (i == child.size() - 1) {
+				v.routeLocation(depot);
+				newChild.add(v);
+			}
+		}
+		
+		return newChild;
+	}
+	
+	private Location getLocationById(int id) {
+		for (Location l : locations) {
+			if (l.getId() == id) {
+				return l;
 			}
 		}
 		return null;
 	}
-	
+	private HashMap<int[], Double> getEdgesCosts(ArrayList<Location> locations) {
+		HashMap<int[], Double> edgesCosts = new HashMap<>();
+		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
+		int idSource, idDest;
+		double distance;
+		for (int i = 0; i < locations.size() - 1; i++) {
+			idSource = locations.get(i).getId();
+			idDest = locations.get(i + 1).getId();
+			int[] edge = new int[] {idSource, idDest};
+			distance = distances.get(idSource).get(idDest);
+			edgesCosts.put(edge, distance);
+		}
+		return edgesCosts;
+	}
 	private ArrayList<Location> getLocations(ArrayList<Vehicle> individual) {
 		ArrayList<Location> locations = new ArrayList<>();
 		for (Vehicle v : individual) {
 			for (Location l : v.getRoute()) {
-				locations.add(l);
+				if (l.getId() != 0) {
+					locations.add(l);
+				}
 			}
 		}
 		return locations;
 	}
 	
-	private <T> ArrayList<ArrayList<T>> chunkList(ArrayList<T> list) {
-		int listSize = list.size();
-	    ArrayList<ArrayList<T>> chunkList = new ArrayList<>(list.size() / nbPointsCross);
-	    for (int i = 0; i < list.size(); i += nbPointsCross) {
-	    	ArrayList<T> l = new ArrayList<>(list.subList(i, i + nbPointsCross >= listSize ? listSize : i + nbPointsCross));
-	        chunkList.add(l);
-	    }
-	    return chunkList;
-	}
-	
 	private ArrayList<ArrayList<Vehicle>> mutation(ArrayList<ArrayList<Vehicle>> population) {
 		return null;
-	}
-	
-	private ArrayList<ArrayList<Vehicle>> rouletteWheelReproduction() {
-		ArrayList<Double> costs = new ArrayList<>();
-		double total = 0;
-		for (ArrayList<Vehicle> individual : population) {
-			double cost = objectiveFunction(individual);
-			costs.add(cost);
-			total += cost;
-		}
-		ArrayList<double[]> rouletteWheel = new ArrayList<double[]>();
-		double p = 0;
-		for (int i = 0; i < costs.size() - 1; i++) {
-			double[] interval = new double[2];
-			interval[0] = p;
-			p += costs.get(i + 1) / total;
-			interval[1] = p;
-			rouletteWheel.add(interval);
-		}
-		rouletteWheel.add(new double[] {p, 1d});
-		
-		ArrayList<ArrayList<Vehicle>> nextPopulation = new ArrayList<>();
-		// Launch wheel nbindividuals times to create the nextPopulation
-		for (int i = 0; i < nbIndividuals; i++) {
-			p = rand.nextDouble();
-			nextPopulation.add(launchWheel(p, rouletteWheel));
-		}
-		return nextPopulation;
-	}
-	
-	private ArrayList<Vehicle> launchWheel(Double p, ArrayList<double[]> rouletteWheel) {
-		double[] interval;
-		ArrayList<Vehicle> winner = null;
-		for (int j = 0; j < rouletteWheel.size(); j++) {
-			interval = rouletteWheel.get(j);
-			if (p >= interval[0] && p < interval[1]) {
-				winner = population.get(j);
-				break;
-			}
-		}
-		return winner;
-	}
-	
-	private void bestSolutionsReproduction() {
-		population.sort((idv1, idv2) -> Double.compare(objectiveFunction(idv1), objectiveFunction(idv2)));
-		ArrayList<ArrayList<Vehicle>> tmpPopulation = new ArrayList<>();
-		for (int i = 0; i < nbBest; i++) {
-			tmpPopulation.add(population.get(i));
-		}
-		population = tmpPopulation;
 	}
 	
 	private void initPopulation() {
