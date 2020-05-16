@@ -12,22 +12,22 @@ public class Program {
 	
 	private static final long NB_GENERATIONS = 600;
 	private static final int NB_INDIVIDUALS = 30;
-	private static final double P_CROSS = 0.99999999999999999;
+	private static final double P_MUTATION = 0.01;
 	
 	public static void main(String[] args) {
 		HashMap<String, ArrayList<Vehicle>> routesList = new HashMap<>();
 		HashMap<String, ArrayList<Double>> costsHistories = new HashMap<>();
 	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE + ".txt");
 	    
-	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_CROSS);
+	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_MUTATION);
         genetic.exec();
         String descTabu = "Algorithme génétique (" + genetic.getInlineDescription() + ")";
         routesList.put(descTabu, genetic.getBestVehicles());
         costsHistories.put(descTabu, genetic.getCostsHistory());
         
-        /*String parametersDesc = "Nombre de véhicules : " + NB_VEHICLES + ", Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
+        String parametersDesc = "Nombre de véhicules : " + NB_VEHICLES + ", Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
         Util.drawGraphs("Graphes CVRP Voisinage", parametersDesc, routesList);
-        Util.drawLineCharts("Line charts CVRP Voisinage", parametersDesc, costsHistories);*/
+        Util.drawLineCharts("Line charts CVRP Voisinage", parametersDesc, costsHistories);
     }
 
 }
