@@ -5,15 +5,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Genetic {
 	
 	private long nbGenerations;
 	private int nbIndividuals;
-	private int nbBest;
 	private double pCross;
-	private int nbPointsCross;
 	private int maxCapacity;
     private int nbVehicles;
 	private ArrayList<Location> locations;
@@ -23,14 +20,12 @@ public class Genetic {
     private ArrayList<Double> costsHistory;
 	private Random rand;
 	
-	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pCross, int nbPointsCross) {
+	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, double pCross) {
 		this.nbVehicles = nbVehicles;
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
-    	this.nbBest = nbBest;
     	this.pCross = pCross;
-    	this.nbPointsCross = nbPointsCross;
     	population = new ArrayList<ArrayList<Vehicle>>(nbIndividuals);
     	this.locations = Util.createDeepCopyLocations(locations);
     	rand = new Random();
@@ -51,48 +46,52 @@ public class Genetic {
     }
 	
 	public void exec() {
-		hGreXCrossover(population.get(1), population.get(2));
-		System.exit(0);
 		bestCost = Double.POSITIVE_INFINITY;
 		updateBestSolution();
 		//displayDescription();
 		for (int i = 0; i < nbGenerations; i++) {
-			ArrayList<ArrayList<Vehicle>> populationTournament = tournament();
-			ArrayList<Vehicle> p1 = populationTournament.get(0);
-			ArrayList<Vehicle> p2 = populationTournament.get(1);
+			ArrayList<Vehicle> p1 = tournament(3);
+			ArrayList<Vehicle> p2 = tournament(2);
 			ArrayList<Vehicle> c = hGreXCrossover(p1, p2);
 			updateBestSolution();
 		}
 	    //displayBestSolution();
     }
 	
-	private ArrayList<ArrayList<Vehicle>> tournament() {
-		ArrayList<ArrayList<Vehicle>> newPopulation = new ArrayList<>();
-		ArrayList<ArrayList<Vehicle>> populationCopy = Util.createDeepCopyPopulation(population);
-		int populationSize = populationCopy.size();
-		int idxIdv1, idxIdv2;
-		boolean bestIdvWin;
-		double p = 0.85;
-		ArrayList<Vehicle> idv1, idv2;
-		while (!populationCopy.isEmpty()) {
-			if (populationCopy.size() == 1) {
-				newPopulation.add(populationCopy.get(0));
+	private ArrayList<Vehicle> tournament(int nbParticipants) {
+		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants);
+		double totalCost = 0;
+		ArrayList<Vehicle> participant;
+		ArrayList<Double> costs = new ArrayList<>();
+		double cost;
+		for (int i = 0; i < nbParticipants; i++) {
+			participant = population.get(rand.nextInt(population.size()));
+			participants.add(participant);
+			cost = objectiveFunction(participant);
+			costs.add(cost);
+			totalCost += cost;
+		}
+		ArrayList<double[]> probasMass = new ArrayList<double[]>();
+		double p = 0;
+		for (int i = 0; i < participants.size() - 1; i++) {
+			double[] interval = new double[2];
+			interval[0] = p;
+			p += costs.get(i + 1) / totalCost;
+			interval[1] = p;
+			probasMass.add(interval);
+		}
+		probasMass.add(new double[] {p, 1d});
+		p = rand.nextDouble();
+		double[] interval;
+		ArrayList<Vehicle> winner = null;
+		for (int j = 0; j < probasMass.size(); j++) {
+			interval = probasMass.get(j);
+			if (p >= interval[0] && p < interval[1]) {
+				winner = participants.get(j);
 				break;
 			}
-			idxIdv1 = rand.nextInt(populationSize);
-			idv1 = populationCopy.get(idxIdv1);
-			populationCopy.remove(idxIdv1);
-			idxIdv2 = rand.nextInt(populationSize);
-			idv2 = populationCopy.get(idxIdv2);
-			populationCopy.remove(idxIdv2);
-			bestIdvWin = rand.nextDouble() < p;
-			if (objectiveFunction(idv1) <= objectiveFunction(idv2)) {
-				newPopulation.add(bestIdvWin ? idv1 : idv2);
-			} else {
-				newPopulation.add(bestIdvWin ? idv2 : idv1);
-			}
 		}
-		return newPopulation;
+		return winner;
 	}
 	
 	private ArrayList<Vehicle> hGreXCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {
@@ -104,47 +103,53 @@ public class Genetic {
 		child.add(p1Locations.get(0).getId());
 		int lastLocId = p1Locations.get(1).getId();
 		child.add(lastLocId);
-		Double min;
-		int[] minEdge;
+		double distance;
+		double minCost;
+		int[] minEdge, key;
 		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
 		while (child.size() < p1Locations.size()) {
-			min = Double.POSITIVE_INFINITY;
+			minCost = Double.POSITIVE_INFINITY;
 			minEdge = null;
-			for (Map.Entry<int[], Double> me : pCosts.entrySet()) {
-				if (me.getKey()[0] == lastLocId && !child.contains(me.getKey()[1]) && me.getValue() < min) {
-					minEdge = me.getKey();
-					min = me.getValue();
+			for (Map.Entry<int[], Double> entry : pCosts.entrySet()) {
+				key = entry.getKey();
+				if (key[0] == lastLocId && !child.contains(key[1]) && entry.getValue() < minCost) {
+					minEdge = key;
+					minCost = entry.getValue();
 				}
 	        }
 			if (minEdge == null) {
-				Double distance;
 				for (Location l : p1Locations) {
-					if (!child.contains(l.getId()) && (distance = distances.get(lastLocId).get(l.getId())) < min) {
+					if (!child.contains(l.getId()) && (distance = distances.get(lastLocId).get(l.getId())) < minCost) {
 						minEdge = new int[] {lastLocId, l.getId()};
-						min = distance;
+						minCost = distance;
 					}
 				}
 			}
 			lastLocId = minEdge[1];
 			child.add(lastLocId);
 		}
+		
+		ArrayList<Vehicle> newChild = reconstruct(child);
+		return newChild;
+	}
+	
+	private ArrayList<Vehicle> reconstruct(ArrayList<Integer> locations) {
 		ArrayList<Vehicle> newChild = new ArrayList<>();
 		Vehicle v = new Vehicle(maxCapacity);
 		Location depot = getLocationById(0);
 		v.routeLocation(depot);
-		for (int i = 0; i < child.size(); i++) {
-			if (!v.routeLocation(getLocationById(child.get(i)))) {
+		for (int i = 0; i < locations.size(); i++) {
+			if (!v.routeLocation(getLocationById(locations.get(i)))) {
 				v.routeLocation(depot);
 				newChild.add(v);
 				v = new Vehicle(maxCapacity);
 				v.routeLocation(depot);
-				v.routeLocation(getLocationById(child.get(i)));
-			} else if (i == child.size() - 1) {
+				v.routeLocation(getLocationById(locations.get(i)));
+			} else if (i == locations.size() - 1) {
 				v.routeLocation(depot);
 				newChild.add(v);
 			}
 		}
-		
 		return newChild;
 	}
 	
