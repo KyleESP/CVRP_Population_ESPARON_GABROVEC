@@ -12,7 +12,6 @@ public class Genetic {
 	private int nbIndividuals;
 	private double pMutation;
 	private int maxCapacity;
-    private int nbVehicles;
 	private ArrayList<Location> locations;
 	private ArrayList<ArrayList<Vehicle>> population;
     private ArrayList<Vehicle> bestVehicles;
@@ -21,7 +20,6 @@ public class Genetic {
 	private Random rand;
 	
 	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation) {
-		this.nbVehicles = nbVehicles;
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
@@ -277,10 +275,6 @@ public class Genetic {
 			}
 		}
 		return locations;
-	}
-	
-	private ArrayList<ArrayList<Vehicle>> mutation(ArrayList<ArrayList<Vehicle>> population) {
-		return null;
 	}
 	
 	private void initPopulation() {
