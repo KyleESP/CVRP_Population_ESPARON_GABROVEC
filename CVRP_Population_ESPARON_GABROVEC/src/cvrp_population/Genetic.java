@@ -14,7 +14,7 @@ public class Genetic {
 	private int maxCapacity;
 	private ArrayList<Location> locations;
 	private ArrayList<ArrayList<Vehicle>> population;
-    private ArrayList<Vehicle> bestVehicles;
+    private ArrayList<Vehicle> bestIndividual;
     private double bestCost;
     private ArrayList<Double> costsHistory;
 	private Random rand;
@@ -25,39 +25,28 @@ public class Genetic {
     	this.nbIndividuals = nbIndividuals;
     	this.pMutation = pMutation;
     	population = new ArrayList<ArrayList<Vehicle>>(nbIndividuals);
-    	this.locations = Util.createDeepCopyLocations(locations);
+    	this.locations = locations;
     	rand = new Random();
     	costsHistory = new ArrayList<>();
 		initPopulation();
 	}
-    
-    public ArrayList<Vehicle> getBestVehicles() {
-    	return bestVehicles;
-    }
-    
-    public double getBestCost() {
-    	return bestCost;
-    }
-    
-    public ArrayList<Double> getCostsHistory() {
-    	return costsHistory;
-    }
 	
-	public void exec() {
-		getInversionMutation(population.get(0));
+    public void exec() {
 		bestCost = Double.POSITIVE_INFINITY;
 		updateBestSolution();
-		//displayDescription();
+		displayDescription();
 		double percentage;
+		ArrayList<Vehicle> parent1, parent2, child;
+		ArrayList<Vehicle> parentMutation, mutant;
 		for (int i = 0; i < nbGenerations; i++) {
-			ArrayList<Vehicle> p1 = tournament(3);
-			ArrayList<Vehicle> p2 = tournament(3);
-			ArrayList<Vehicle> c = hGreXCrossover(p1, p2);
-			setSimilarIndividual(c);
+			parent1 = tournament(3);
+			parent2 = tournament(3);
+			child = hGreXCrossover(parent1, parent2);
+			setSimilarIndividual(child);
 			if (rand.nextDouble() <= pMutation) {
-				ArrayList<Vehicle> parent = getRandomButNotBest();
-				ArrayList<Vehicle> mutant = getInversionMutation(parent);
-				population.remove(parent);
+				parentMutation = getRandomButNotBest();
+				mutant = getInversionMutation(parentMutation);
+				population.remove(parentMutation);
 				population.add(mutant);
 			}
 			updateBestSolution();
@@ -66,10 +55,10 @@ public class Genetic {
         		System.out.println((int)percentage + "%");
         	}
 		}
-	    //displayBestSolution();
+	    displaySolution(bestIndividual);
     }
 	
-	private ArrayList<Vehicle> getBestIndividual() {
+	private ArrayList<Vehicle> getBestIndividualInCurrentPopulation() {
 		double fMin = Double.POSITIVE_INFINITY;
 		ArrayList<Vehicle> xMin = null;
 		double fCurr;
@@ -95,7 +84,7 @@ public class Genetic {
 	}
 	
 	private ArrayList<Vehicle> getRandomButNotBest() {
-		ArrayList<Vehicle> bestIndividual = getBestIndividual();
+		ArrayList<Vehicle> bestIndividual = getBestIndividualInCurrentPopulation();
 		ArrayList<Vehicle> randomInd;
 		do {
 			randomInd = population.get(rand.nextInt(population.size()));
@@ -214,11 +203,10 @@ public class Genetic {
 				v = new Vehicle(maxCapacity);
 				v.routeLocation(depot);
 				v.routeLocation(getLocationById(locations.get(i)));
-			} else if (i == locations.size() - 1) {
-				v.routeLocation(depot);
-				newChild.add(v);
 			}
 		}
+		v.routeLocation(depot);
+		newChild.add(v);
 		return newChild;
 	}
 	
@@ -234,11 +222,10 @@ public class Genetic {
 				v = new Vehicle(maxCapacity);
 				v.routeLocation(depot);
 				v.routeLocation(locations.get(i));
-			} else if (i == locations.size() - 1) {
-				v.routeLocation(depot);
-				newChild.add(v);
 			}
 		}
+		v.routeLocation(depot);
+		newChild.add(v);
 		return newChild;
 	}
 	
@@ -250,15 +237,17 @@ public class Genetic {
 		}
 		return null;
 	}
+	
 	private HashMap<int[], Double> getEdgesCosts(ArrayList<Location> locations) {
 		HashMap<int[], Double> edgesCosts = new HashMap<>();
 		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
 		int idSource, idDest;
 		double distance;
+		int[] edge;
 		for (int i = 0; i < locations.size() - 1; i++) {
 			idSource = locations.get(i).getId();
 			idDest = locations.get(i + 1).getId();
-			int[] edge = new int[] {idSource, idDest};
+			edge = new int[] {idSource, idDest};
 			distance = distances.get(idSource).get(idDest);
 			edgesCosts.put(edge, distance);
 		}
@@ -333,9 +322,9 @@ public class Genetic {
 		}
 		if (fMin < bestCost) {
 			bestCost = fMin;
-			bestVehicles = xMin;
+			bestIndividual = xMin;
 		}
-    	costsHistory.add(fMin);
+    	costsHistory.add(bestCost);
 	}
 	
 	public void displayDescription() {
@@ -344,17 +333,17 @@ public class Genetic {
 		String description = "Coût initial = " + (double) Math.round(bestCost * 1000) / 1000;
 		description += "\nNombre de générations = " + nbGenerations;
 		description += "\nNombre d'individus = " + nbIndividuals;
-		description += "\nProbabilité de croisement = " + pMutation;
+		description += "\nProbabilité de mutation = " + pMutation;
 		System.out.println(description);
 		System.out.println("----------------------------------------------------------------------------------------------------");
 	}
 	
 	public String getInlineDescription() {
 		String description = "Coût final = " + (double) Math.round(bestCost * 1000) / 1000;
-		description += " | Nb véhicules = " + bestVehicles.size() + " | ";
+		description += " | Nb véhicules = " + bestIndividual.size() + " | ";
 		description += " | Nombre d'individus = " +  nbIndividuals;
 		description += " | Nombre de générations = " + nbGenerations;
-		description += " | Probabilité de croisement = " + pMutation;
+		description += " | Probabilité de mutation = " + pMutation;
 		return description;
 	}
 	
@@ -391,15 +380,19 @@ public class Genetic {
     	return routeString;
     }
     
-    public void displayPopulation(ArrayList<ArrayList<Vehicle>> population) {
-    	for (int i = 0; i < population.size(); i++) {
-    		System.out.println("Individu n°" + (i + 1));
-    		displaySolution(population.get(i));
-    		System.out.println();
-    	}
-    }
-    
     public ArrayList<ArrayList<Vehicle>> getPopulation() {
     	return population;
+    }
+    
+    public ArrayList<Vehicle> getBestIndividual() {
+    	return bestIndividual;
+    }
+    
+    public double getBestCost() {
+    	return bestCost;
+    }
+    
+    public ArrayList<Double> getCostsHistory() {
+    	return costsHistory;
     }
 }

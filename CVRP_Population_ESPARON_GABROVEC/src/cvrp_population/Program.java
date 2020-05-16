@@ -22,7 +22,7 @@ public class Program {
 	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_MUTATION);
         genetic.exec();
         String descTabu = "Algorithme génétique (" + genetic.getInlineDescription() + ")";
-        routesList.put(descTabu, genetic.getBestVehicles());
+        routesList.put(descTabu, genetic.getBestIndividual());
         costsHistories.put(descTabu, genetic.getCostsHistory());
         
         String parametersDesc = "Nombre de véhicules : " + NB_VEHICLES + ", Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
