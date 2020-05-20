@@ -53,7 +53,7 @@ public class Genetic2 {
 			setSimilarIndividual(child);
 			if (rand.nextDouble() <= pMutation) {
 				parentMutation = getRandomButNotBest();
-				mutant = mutationOperator.getInversionMutation(parentMutation);
+				mutant = mutationOperator.inversionMutation(parentMutation);
 				population.remove(parentMutation);
 				population.add(mutant);
 			}

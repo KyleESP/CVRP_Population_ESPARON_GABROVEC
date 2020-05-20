@@ -10,7 +10,7 @@ public class Program {
 	private static final int NB_VEHICLES = 20;
 	private static final int MAX_VEHICLES_CAPACITY = 100;
 	
-	private static final long NB_GENERATIONS = 60000;
+	private static final long NB_GENERATIONS = 130000;
 	private static final int NB_INDIVIDUALS = 30;
 	private static final double P_MUTATION = 0.01;
 	

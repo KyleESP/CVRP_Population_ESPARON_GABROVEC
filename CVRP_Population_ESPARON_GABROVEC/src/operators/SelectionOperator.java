@@ -29,7 +29,8 @@ public class SelectionOperator {
 			totalCost += cost;
 		}
 		ArrayList<double[]> probasMass = getProbasRepartition(costs, totalCost);
-		return getWinner(probasMass, participants);
+		ArrayList<Vehicle> winner = getWinner(probasMass, participants);
+		return winner;
 	}
 	
 	public ArrayList<ArrayList<Vehicle>> rouletteWheel(int nbIndividuals) {
