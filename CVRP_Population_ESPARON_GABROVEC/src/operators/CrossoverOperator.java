@@ -52,7 +52,7 @@ public class CrossoverOperator {
 			child.add(lastLocId);
 		}
 		
-		ArrayList<Vehicle> newChild = reconstructWithIds(child);
+		ArrayList<Vehicle> newChild = Util.reconstruct(child, gen.getLocations(), gen.getMaxCapacity());
 		return newChild;
 	}
 	
@@ -70,24 +70,5 @@ public class CrossoverOperator {
 			edgesCosts.put(edge, distance);
 		}
 		return edgesCosts;
-	}
-	
-	private ArrayList<Vehicle> reconstructWithIds(ArrayList<Integer> brokenLocations) {
-		ArrayList<Vehicle> newChild = new ArrayList<>();
-		Vehicle v = new Vehicle(gen.getMaxCapacity());
-		Location depot = Util.getLocationById(0, gen.getLocations());
-		v.routeLocation(depot);
-		for (int i = 0; i < brokenLocations.size(); i++) {
-			if (!v.routeLocation(Util.getLocationById(brokenLocations.get(i), gen.getLocations()))) {
-				v.routeLocation(depot);
-				newChild.add(v);
-				v = new Vehicle(gen.getMaxCapacity());
-				v.routeLocation(depot);
-				v.routeLocation(Util.getLocationById(brokenLocations.get(i), gen.getLocations()));
-			}
-		}
-		v.routeLocation(depot);
-		newChild.add(v);
-		return newChild;
 	}
 }

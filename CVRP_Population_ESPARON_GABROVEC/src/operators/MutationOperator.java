@@ -24,26 +24,7 @@ public class MutationOperator {
 			b = gen.getRand().nextInt(locations.size());
 		} while (b == a);
 		Collections.reverse(a < b ? locations.subList(a, b) : locations.subList(b, a));
-		ArrayList<Vehicle> reconstruction = reconstruct(locations);
+		ArrayList<Vehicle> reconstruction = Util.reconstruct(locations, gen.getLocations(), gen.getMaxCapacity());
 		return reconstruction;
-	}
-	
-	private ArrayList<Vehicle> reconstruct(ArrayList<Location> brokenLocations) {
-		ArrayList<Vehicle> newChild = new ArrayList<>();
-		Vehicle v = new Vehicle(gen.getMaxCapacity());
-		Location depot = Util.getLocationById(0, gen.getLocations());
-		v.routeLocation(depot);
-		for (int i = 0; i < brokenLocations.size(); i++) {
-			if (!v.routeLocation(brokenLocations.get(i))) {
-				v.routeLocation(depot);
-				newChild.add(v);
-				v = new Vehicle(gen.getMaxCapacity());
-				v.routeLocation(depot);
-				v.routeLocation(brokenLocations.get(i));
-			}
-		}
-		v.routeLocation(depot);
-		newChild.add(v);
-		return newChild;
 	}
 }

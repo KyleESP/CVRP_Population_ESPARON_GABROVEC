@@ -77,6 +77,27 @@ public abstract class Util {
         }
     }
 	
+    public static <T> ArrayList<Vehicle> reconstruct(ArrayList<T> brokenLocations, ArrayList<Location> locations, int maxCapacity) {
+		ArrayList<Vehicle> newChild = new ArrayList<>();
+		Vehicle v = new Vehicle(maxCapacity);
+		Location depot = getLocationById(0, locations);
+		v.routeLocation(depot);
+		Location l;
+		for (int i = 0; i < brokenLocations.size(); i++) {
+			l = (brokenLocations.get(i) instanceof Integer) ? getLocationById((Integer)brokenLocations.get(i), locations) : (Location)brokenLocations.get(i);
+			if (!v.routeLocation(l)) {
+				v.routeLocation(depot);
+				newChild.add(v);
+				v = new Vehicle(maxCapacity);
+				v.routeLocation(depot);
+				v.routeLocation(l);
+			}
+		}
+		v.routeLocation(depot);
+		newChild.add(v);
+		return newChild;
+	}
+    
     public static double objectiveFunction(ArrayList<Vehicle> vehicles) {
 		double sumDist = 0;
     	double sumVehicles = 0;
