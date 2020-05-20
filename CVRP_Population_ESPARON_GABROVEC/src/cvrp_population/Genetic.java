@@ -2,12 +2,17 @@ package cvrp_population;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
+
+import operators.CrossoverOperator;
+import operators.MutationOperator;
+import operators.SelectionOperator;
 
 public class Genetic {
 	
+	private CrossoverOperator crossoverOperator;
+	private MutationOperator mutationOperator;
+	private SelectionOperator selectionOperator;
 	private long nbGenerations;
 	private int nbIndividuals;
 	private double pMutation;
@@ -24,9 +29,12 @@ public class Genetic {
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
     	this.pMutation = pMutation;
-    	population = new ArrayList<ArrayList<Vehicle>>(nbIndividuals);
+    	population = new ArrayList<>(nbIndividuals);
     	this.locations = locations;
     	rand = new Random();
+    	selectionOperator = new SelectionOperator(rand);
+    	mutationOperator = new MutationOperator(locations, maxCapacity);
+    	crossoverOperator = new CrossoverOperator(locations, maxCapacity);
     	costsHistory = new ArrayList<>();
 		initPopulation();
 	}
@@ -39,13 +47,13 @@ public class Genetic {
 		ArrayList<Vehicle> parent1, parent2, child;
 		ArrayList<Vehicle> parentMutation, mutant;
 		for (int i = 0; i < nbGenerations; i++) {
-			parent1 = tournament(3);
-			parent2 = tournament(3);
-			child = hGreXCrossover(parent1, parent2);
+			parent1 = selectionOperator.tournament(population, 3);
+			parent2 = selectionOperator.tournament(population, 3);
+			child = crossoverOperator.hGreXCrossover(parent1, parent2);
 			setSimilarIndividual(child);
 			if (rand.nextDouble() <= pMutation) {
 				parentMutation = getRandomButNotBest();
-				mutant = getInversionMutation(parentMutation);
+				mutant = mutationOperator.getInversionMutation(parentMutation, rand);
 				population.remove(parentMutation);
 				population.add(mutant);
 			}
@@ -63,24 +71,12 @@ public class Genetic {
 		ArrayList<Vehicle> xMin = null;
 		double fCurr;
 		for (ArrayList<Vehicle> vehicles : population) {
-			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
+			if ((fCurr = Util.objectiveFunction(vehicles)) < fMin) {
 				fMin = fCurr;
 				xMin = vehicles;
 			}
 		}
 		return xMin;
-	}
-	
-	private ArrayList<Vehicle> getInversionMutation(ArrayList<Vehicle> individual) {
-		ArrayList<Location> locations = getLocations(individual);
-		int a = rand.nextInt(locations.size());
-		int b;
-		do {
-			b = rand.nextInt(locations.size());
-		} while (b == a);
-		Collections.reverse(a < b ? locations.subList(a, b) : locations.subList(b, a));
-		ArrayList<Vehicle> reconstruction = reconstruct(locations);
-		return reconstruction;
 	}
 	
 	private ArrayList<Vehicle> getRandomButNotBest() {
@@ -93,12 +89,12 @@ public class Genetic {
 	}
 	
 	private void setSimilarIndividual(ArrayList<Vehicle> individual) {
-		double indCost = objectiveFunction(individual);
+		double indCost = Util.objectiveFunction(individual);
 		double currIndCost;
 		boolean indCostBetter;
 		boolean hasSimilar = false;
 		for (ArrayList<Vehicle> currInd : population) {
-			currIndCost = objectiveFunction(currInd);
+			currIndCost = Util.objectiveFunction(currInd);
 			indCostBetter = currIndCost < indCost;
 			if (Math.abs(currIndCost - indCost) / (indCostBetter ? currIndCost : indCost) < 0.01) {
 				if (indCostBetter) {
@@ -110,160 +106,10 @@ public class Genetic {
 			}
 		}
 		if (!hasSimilar) {
-			ArrayList<Vehicle> badIndividual = tournament(2);
+			ArrayList<Vehicle> badIndividual = selectionOperator.tournament(population, 2);
 			population.remove(badIndividual);
 			population.add(individual);
 		}
-	}
-	
-	private ArrayList<Vehicle> tournament(int nbParticipants) {
-		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants);
-		double totalCost = 0;
-		ArrayList<Vehicle> participant;
-		ArrayList<Double> costs = new ArrayList<>();
-		double cost;
-		for (int i = 0; i < nbParticipants; i++) {
-			participant = population.get(rand.nextInt(population.size()));
-			participants.add(participant);
-			cost = objectiveFunction(participant);
-			costs.add(cost);
-			totalCost += cost;
-		}
-		ArrayList<double[]> probasMass = new ArrayList<double[]>();
-		double p = 0;
-		for (int i = 0; i < participants.size() - 1; i++) {
-			double[] interval = new double[2];
-			interval[0] = p;
-			p += costs.get(i + 1) / totalCost;
-			interval[1] = p;
-			probasMass.add(interval);
-		}
-		probasMass.add(new double[] {p, 1d});
-		p = rand.nextDouble();
-		double[] interval;
-		ArrayList<Vehicle> winner = null;
-		for (int j = 0; j < probasMass.size(); j++) {
-			interval = probasMass.get(j);
-			if (p >= interval[0] && p < interval[1]) {
-				winner = participants.get(j);
-				break;
-			}
-		}
-		return winner;
-	}
-	
-	private ArrayList<Vehicle> hGreXCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {
-		ArrayList<Location> p1Locations = getLocations(p1);
-		HashMap<int[], Double> pCosts = getEdgesCosts(p1Locations);
-		ArrayList<Location> p2Locations = getLocations(p2);
-		pCosts.putAll(getEdgesCosts(p2Locations));
-		ArrayList<Integer> child = new ArrayList<>();
-		child.add(p1Locations.get(0).getId());
-		int lastLocId = p1Locations.get(1).getId();
-		child.add(lastLocId);
-		double distance;
-		double minCost;
-		int[] minEdge, key;
-		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
-		while (child.size() < p1Locations.size()) {
-			minCost = Double.POSITIVE_INFINITY;
-			minEdge = null;
-			for (Map.Entry<int[], Double> entry : pCosts.entrySet()) {
-				key = entry.getKey();
-				if (key[0] == lastLocId && !child.contains(key[1]) && entry.getValue() < minCost) {
-					minEdge = key;
-					minCost = entry.getValue();
-				}
-	        }
-			if (minEdge == null) {
-				for (Location l : p1Locations) {
-					if (!child.contains(l.getId()) && (distance = distances.get(lastLocId).get(l.getId())) < minCost) {
-						minEdge = new int[] {lastLocId, l.getId()};
-						minCost = distance;
-					}
-				}
-			}
-			lastLocId = minEdge[1];
-			child.add(lastLocId);
-		}
-		
-		ArrayList<Vehicle> newChild = reconstructWithIds(child);
-		return newChild;
-	}
-	
-	private ArrayList<Vehicle> reconstructWithIds(ArrayList<Integer> locations) {
-		ArrayList<Vehicle> newChild = new ArrayList<>();
-		Vehicle v = new Vehicle(maxCapacity);
-		Location depot = getLocationById(0);
-		v.routeLocation(depot);
-		for (int i = 0; i < locations.size(); i++) {
-			if (!v.routeLocation(getLocationById(locations.get(i)))) {
-				v.routeLocation(depot);
-				newChild.add(v);
-				v = new Vehicle(maxCapacity);
-				v.routeLocation(depot);
-				v.routeLocation(getLocationById(locations.get(i)));
-			}
-		}
-		v.routeLocation(depot);
-		newChild.add(v);
-		return newChild;
-	}
-	
-	private ArrayList<Vehicle> reconstruct(ArrayList<Location> locations) {
-		ArrayList<Vehicle> newChild = new ArrayList<>();
-		Vehicle v = new Vehicle(maxCapacity);
-		Location depot = getLocationById(0);
-		v.routeLocation(depot);
-		for (int i = 0; i < locations.size(); i++) {
-			if (!v.routeLocation(locations.get(i))) {
-				v.routeLocation(depot);
-				newChild.add(v);
-				v = new Vehicle(maxCapacity);
-				v.routeLocation(depot);
-				v.routeLocation(locations.get(i));
-			}
-		}
-		v.routeLocation(depot);
-		newChild.add(v);
-		return newChild;
-	}
-	
-	private Location getLocationById(int id) {
-		for (Location l : locations) {
-			if (l.getId() == id) {
-				return l;
-			}
-		}
-		return null;
-	}
-	
-	private HashMap<int[], Double> getEdgesCosts(ArrayList<Location> locations) {
-		HashMap<int[], Double> edgesCosts = new HashMap<>();
-		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
-		int idSource, idDest;
-		double distance;
-		int[] edge;
-		for (int i = 0; i < locations.size() - 1; i++) {
-			idSource = locations.get(i).getId();
-			idDest = locations.get(i + 1).getId();
-			edge = new int[] {idSource, idDest};
-			distance = distances.get(idSource).get(idDest);
-			edgesCosts.put(edge, distance);
-		}
-		return edgesCosts;
-	}
-	
-	private ArrayList<Location> getLocations(ArrayList<Vehicle> individual) {
-		ArrayList<Location> locations = new ArrayList<>();
-		for (Vehicle v : individual) {
-			for (Location l : v.getRoute()) {
-				if (l.getId() != 0) {
-					locations.add(l);
-				}
-			}
-		}
-		return locations;
 	}
 	
 	private void initPopulation() {
@@ -315,7 +161,7 @@ public class Genetic {
 		ArrayList<Vehicle> xMin = null;
 		double fCurr;
 		for (ArrayList<Vehicle> vehicles : population) {
-			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
+			if ((fCurr = Util.objectiveFunction(vehicles)) < fMin) {
 				fMin = fCurr;
 				xMin = vehicles;
 			}
@@ -347,22 +193,8 @@ public class Genetic {
 		return description;
 	}
 	
-	private double objectiveFunction(ArrayList<Vehicle> vehicles) {
-		double sumDist = 0;
-    	double sumVehicles = 0;
-    	ArrayList<Location> route;
-    	for(Vehicle v : vehicles) {
-    		route = v.getRoute();
-			sumVehicles++;
-			for (int i = 0; i < route.size() - 1; i++) {
-    			sumDist += Util.getDistances().get(route.get(i).getId()).get(route.get(i + 1).getId());
-    		}
-    	}
-    	return sumDist + sumVehicles;
-    }
-    
     public void displaySolution(ArrayList<Vehicle> vehicles) {
-    	double cost = objectiveFunction(vehicles);
+    	double cost = Util.objectiveFunction(vehicles);
     	System.out.println("----------------------------------------------------------------------------------------------------");
         for (int i = 0 ; i < vehicles.size() ; i++) {
             System.out.println("Véhicule n°" + (i + 1) + " : " + getRouteString(vehicles.get(i).getRoute()));

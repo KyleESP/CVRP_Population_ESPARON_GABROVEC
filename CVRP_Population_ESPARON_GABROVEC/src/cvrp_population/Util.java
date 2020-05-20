@@ -15,6 +15,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 
+import drawings.DrawGraph;
+import drawings.DrawLineChart;
+
 public abstract class Util {
 	
 	private static HashMap<Integer, HashMap<Integer, Double>> distances;
@@ -74,6 +77,41 @@ public abstract class Util {
         }
     }
 	
+    public static double objectiveFunction(ArrayList<Vehicle> vehicles) {
+		double sumDist = 0;
+    	double sumVehicles = 0;
+    	ArrayList<Location> route;
+    	for(Vehicle v : vehicles) {
+    		route = v.getRoute();
+			sumVehicles++;
+			for (int i = 0; i < route.size() - 1; i++) {
+    			sumDist += distances.get(route.get(i).getId()).get(route.get(i + 1).getId());
+    		}
+    	}
+    	return sumDist + sumVehicles;
+    }
+    
+    public static Location getLocationById(int id, ArrayList<Location> locations) {
+		for (Location l : locations) {
+			if (l.getId() == id) {
+				return l;
+			}
+		}
+		return null;
+	}
+    
+    public static ArrayList<Location> getLocations(ArrayList<Vehicle> individual) {
+		ArrayList<Location> locations = new ArrayList<>();
+		for (Vehicle v : individual) {
+			for (Location l : v.getRoute()) {
+				if (l.getId() != 0) {
+					locations.add(l);
+				}
+			}
+		}
+		return locations;
+	}
+    
 	public static void drawGraphs(String title, String parametersDesc, HashMap<String, ArrayList<Vehicle>> routesList) {
 		JFrame frame = new JFrame(title);
         JPanel mainPanel = new JPanel();

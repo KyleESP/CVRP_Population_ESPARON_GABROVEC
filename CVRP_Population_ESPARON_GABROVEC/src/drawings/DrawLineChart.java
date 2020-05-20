@@ -1,4 +1,4 @@
-package cvrp_population;
+package drawings;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

@@ -1,4 +1,4 @@
-package cvrp_population;
+package drawings;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -8,6 +8,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import javax.swing.JPanel;
+
+import cvrp_population.Location;
+import cvrp_population.Vehicle;
 
 public class DrawGraph extends JPanel {
 	
