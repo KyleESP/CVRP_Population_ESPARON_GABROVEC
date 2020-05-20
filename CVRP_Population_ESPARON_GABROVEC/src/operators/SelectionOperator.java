@@ -1,27 +1,27 @@
 package operators;
 
 import java.util.ArrayList;
-import java.util.Random;
 
+import cvrp_population.Genetic;
 import cvrp_population.Util;
 import cvrp_population.Vehicle;
 
 public class SelectionOperator {
 	
-	private Random rand;
+	private Genetic gen;
 	
-	public SelectionOperator(Random rand) {
-		this.rand = rand;
+	public SelectionOperator(Genetic gen) {
+		this.gen = gen;
 	}
 	
-	public ArrayList<Vehicle> tournament(ArrayList<ArrayList<Vehicle>> population, int nbParticipants) {
+	public ArrayList<Vehicle> tournament(int nbParticipants) {
 		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants);
 		double totalCost = 0;
 		ArrayList<Vehicle> participant;
 		ArrayList<Double> costs = new ArrayList<>();
 		double cost;
 		for (int i = 0; i < nbParticipants; i++) {
-			participant = population.get(rand.nextInt(population.size()));
+			participant = gen.getPopulation().get(gen.getRand().nextInt(gen.getPopulation().size()));
 			participants.add(participant);
 			cost = Util.objectiveFunction(participant);
 			costs.add(cost);
@@ -37,7 +37,7 @@ public class SelectionOperator {
 			probasMass.add(interval);
 		}
 		probasMass.add(new double[] {p, 1d});
-		p = rand.nextDouble();
+		p = gen.getRand().nextDouble();
 		double[] interval;
 		ArrayList<Vehicle> winner = null;
 		for (int j = 0; j < probasMass.size(); j++) {

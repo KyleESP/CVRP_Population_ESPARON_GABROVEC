@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import cvrp_population.Genetic;
 import cvrp_population.Location;
 import cvrp_population.Util;
 import cvrp_population.Vehicle;
 
 public class CrossoverOperator {
 	
-	private ArrayList<Location> locations;
-	private int maxCapacity;
+	private Genetic gen;
 	
-	public CrossoverOperator(ArrayList<Location> locations, int maxCapacity) {
-		this.locations = locations;
-		this.maxCapacity = maxCapacity;
+	public CrossoverOperator(Genetic gen) {
+		this.gen = gen;
 	}
 	
 	public ArrayList<Vehicle> hGreXCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {
@@ -75,16 +74,16 @@ public class CrossoverOperator {
 	
 	private ArrayList<Vehicle> reconstructWithIds(ArrayList<Integer> brokenLocations) {
 		ArrayList<Vehicle> newChild = new ArrayList<>();
-		Vehicle v = new Vehicle(maxCapacity);
-		Location depot = Util.getLocationById(0, locations);
+		Vehicle v = new Vehicle(gen.getMaxCapacity());
+		Location depot = Util.getLocationById(0, gen.getLocations());
 		v.routeLocation(depot);
 		for (int i = 0; i < brokenLocations.size(); i++) {
-			if (!v.routeLocation(Util.getLocationById(brokenLocations.get(i), locations))) {
+			if (!v.routeLocation(Util.getLocationById(brokenLocations.get(i), gen.getLocations()))) {
 				v.routeLocation(depot);
 				newChild.add(v);
-				v = new Vehicle(maxCapacity);
+				v = new Vehicle(gen.getMaxCapacity());
 				v.routeLocation(depot);
-				v.routeLocation(Util.getLocationById(brokenLocations.get(i), locations));
+				v.routeLocation(Util.getLocationById(brokenLocations.get(i), gen.getLocations()));
 			}
 		}
 		v.routeLocation(depot);

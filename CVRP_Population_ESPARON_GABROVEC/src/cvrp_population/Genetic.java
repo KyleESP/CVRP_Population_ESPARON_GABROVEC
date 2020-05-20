@@ -32,9 +32,9 @@ public class Genetic {
     	population = new ArrayList<>(nbIndividuals);
     	this.locations = locations;
     	rand = new Random();
-    	selectionOperator = new SelectionOperator(rand);
-    	mutationOperator = new MutationOperator(locations, maxCapacity);
-    	crossoverOperator = new CrossoverOperator(locations, maxCapacity);
+    	selectionOperator = new SelectionOperator(this);
+    	mutationOperator = new MutationOperator(this);
+    	crossoverOperator = new CrossoverOperator(this);
     	costsHistory = new ArrayList<>();
 		initPopulation();
 	}
@@ -47,13 +47,13 @@ public class Genetic {
 		ArrayList<Vehicle> parent1, parent2, child;
 		ArrayList<Vehicle> parentMutation, mutant;
 		for (int i = 0; i < nbGenerations; i++) {
-			parent1 = selectionOperator.tournament(population, 3);
-			parent2 = selectionOperator.tournament(population, 3);
+			parent1 = selectionOperator.tournament(3);
+			parent2 = selectionOperator.tournament(3);
 			child = crossoverOperator.hGreXCrossover(parent1, parent2);
 			setSimilarIndividual(child);
 			if (rand.nextDouble() <= pMutation) {
 				parentMutation = getRandomButNotBest();
-				mutant = mutationOperator.getInversionMutation(parentMutation, rand);
+				mutant = mutationOperator.getInversionMutation(parentMutation);
 				population.remove(parentMutation);
 				population.add(mutant);
 			}
@@ -106,7 +106,7 @@ public class Genetic {
 			}
 		}
 		if (!hasSimilar) {
-			ArrayList<Vehicle> badIndividual = selectionOperator.tournament(population, 2);
+			ArrayList<Vehicle> badIndividual = selectionOperator.tournament(2);
 			population.remove(badIndividual);
 			population.add(individual);
 		}
@@ -203,7 +203,7 @@ public class Genetic {
     	System.out.println("----------------------------------------------------------------------------------------------------");
     }
     
-    private String getRouteString(ArrayList<Location> route) {
+    public String getRouteString(ArrayList<Location> route) {
     	int routeSize = route.size();
     	String routeString = "";
     	for (int i = 0; i < routeSize ; i++) {
@@ -226,5 +226,17 @@ public class Genetic {
     
     public ArrayList<Double> getCostsHistory() {
     	return costsHistory;
+    }
+    
+    public Random getRand() {
+    	return rand;
+    }
+    
+    public int getMaxCapacity() {
+    	return maxCapacity;
+    }
+    
+    public ArrayList<Location> getLocations() {
+    	return locations;
     }
 }

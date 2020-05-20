@@ -2,28 +2,26 @@ package operators;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 
+import cvrp_population.Genetic;
 import cvrp_population.Location;
 import cvrp_population.Util;
 import cvrp_population.Vehicle;
 
 public class MutationOperator {
 	
-	private ArrayList<Location> locations;
-	private int maxCapacity;
+	private Genetic gen;
 	
-	public MutationOperator(ArrayList<Location> locations, int maxCapacity) {
-		this.locations = locations;
-		this.maxCapacity = maxCapacity;
+	public MutationOperator(Genetic gen) {
+		this.gen = gen;
 	}
 	
-	public ArrayList<Vehicle> getInversionMutation(ArrayList<Vehicle> individual, Random rand) {
+	public ArrayList<Vehicle> getInversionMutation(ArrayList<Vehicle> individual) {
 		ArrayList<Location> locations = Util.getLocations(individual);
-		int a = rand.nextInt(locations.size());
+		int a = gen.getRand().nextInt(locations.size());
 		int b;
 		do {
-			b = rand.nextInt(locations.size());
+			b = gen.getRand().nextInt(locations.size());
 		} while (b == a);
 		Collections.reverse(a < b ? locations.subList(a, b) : locations.subList(b, a));
 		ArrayList<Vehicle> reconstruction = reconstruct(locations);
@@ -32,14 +30,14 @@ public class MutationOperator {
 	
 	private ArrayList<Vehicle> reconstruct(ArrayList<Location> brokenLocations) {
 		ArrayList<Vehicle> newChild = new ArrayList<>();
-		Vehicle v = new Vehicle(maxCapacity);
-		Location depot = Util.getLocationById(0, locations);
+		Vehicle v = new Vehicle(gen.getMaxCapacity());
+		Location depot = Util.getLocationById(0, gen.getLocations());
 		v.routeLocation(depot);
 		for (int i = 0; i < brokenLocations.size(); i++) {
 			if (!v.routeLocation(brokenLocations.get(i))) {
 				v.routeLocation(depot);
 				newChild.add(v);
-				v = new Vehicle(maxCapacity);
+				v = new Vehicle(gen.getMaxCapacity());
 				v.routeLocation(depot);
 				v.routeLocation(brokenLocations.get(i));
 			}
