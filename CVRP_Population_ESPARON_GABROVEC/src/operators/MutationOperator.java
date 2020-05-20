@@ -24,7 +24,7 @@ public class MutationOperator {
 			b = gen.getRand().nextInt(locations.size());
 		} while (b == a);
 		Collections.reverse(a < b ? locations.subList(a, b) : locations.subList(b, a));
-		ArrayList<Vehicle> reconstruction = Util.reconstruct(locations, gen.getLocations(), gen.getMaxCapacity());
+		ArrayList<Vehicle> reconstruction = gen.reconstruct(locations);
 		return reconstruction;
 	}
 }

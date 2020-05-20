@@ -52,7 +52,7 @@ public class CrossoverOperator {
 			child.add(lastLocId);
 		}
 		
-		ArrayList<Vehicle> newChild = Util.reconstruct(child, gen.getLocations(), gen.getMaxCapacity());
+		ArrayList<Vehicle> newChild = gen.reconstruct(child);
 		return newChild;
 	}
 	

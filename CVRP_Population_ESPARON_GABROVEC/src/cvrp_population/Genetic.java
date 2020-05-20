@@ -71,7 +71,7 @@ public class Genetic {
 		ArrayList<Vehicle> xMin = null;
 		double fCurr;
 		for (ArrayList<Vehicle> vehicles : population) {
-			if ((fCurr = Util.objectiveFunction(vehicles)) < fMin) {
+			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
 				fMin = fCurr;
 				xMin = vehicles;
 			}
@@ -89,12 +89,12 @@ public class Genetic {
 	}
 	
 	private void setSimilarIndividual(ArrayList<Vehicle> individual) {
-		double indCost = Util.objectiveFunction(individual);
+		double indCost = objectiveFunction(individual);
 		double currIndCost;
 		boolean indCostBetter;
 		boolean hasSimilar = false;
 		for (ArrayList<Vehicle> currInd : population) {
-			currIndCost = Util.objectiveFunction(currInd);
+			currIndCost = objectiveFunction(currInd);
 			indCostBetter = currIndCost < indCost;
 			if (Math.abs(currIndCost - indCost) / (indCostBetter ? currIndCost : indCost) < 0.01) {
 				if (indCostBetter) {
@@ -161,7 +161,7 @@ public class Genetic {
 		ArrayList<Vehicle> xMin = null;
 		double fCurr;
 		for (ArrayList<Vehicle> vehicles : population) {
-			if ((fCurr = Util.objectiveFunction(vehicles)) < fMin) {
+			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
 				fMin = fCurr;
 				xMin = vehicles;
 			}
@@ -172,6 +172,41 @@ public class Genetic {
 		}
     	costsHistory.add(bestCost);
 	}
+	
+	public <T> ArrayList<Vehicle> reconstruct(ArrayList<T> brokenLocations) {
+		ArrayList<Vehicle> newChild = new ArrayList<>();
+		Vehicle v = new Vehicle(maxCapacity);
+		Location depot = Util.getLocationById(0, locations);
+		v.routeLocation(depot);
+		Location l;
+		for (int i = 0; i < brokenLocations.size(); i++) {
+			l = (brokenLocations.get(i) instanceof Integer) ? Util.getLocationById((Integer)brokenLocations.get(i), locations) : (Location)brokenLocations.get(i);
+			if (!v.routeLocation(l)) {
+				v.routeLocation(depot);
+				newChild.add(v);
+				v = new Vehicle(maxCapacity);
+				v.routeLocation(depot);
+				v.routeLocation(l);
+			}
+		}
+		v.routeLocation(depot);
+		newChild.add(v);
+		return newChild;
+	}
+	
+	public double objectiveFunction(ArrayList<Vehicle> vehicles) {
+		double sumDist = 0;
+    	double sumVehicles = 0;
+    	ArrayList<Location> route;
+    	for(Vehicle v : vehicles) {
+    		route = v.getRoute();
+			sumVehicles++;
+			for (int i = 0; i < route.size() - 1; i++) {
+    			sumDist += Util.getDistances().get(route.get(i).getId()).get(route.get(i + 1).getId());
+    		}
+    	}
+    	return sumDist + sumVehicles;
+    }
 	
 	public void displayDescription() {
 		System.out.println("----------------------------------------------------------------------------------------------------");
@@ -194,7 +229,7 @@ public class Genetic {
 	}
 	
     public void displaySolution(ArrayList<Vehicle> vehicles) {
-    	double cost = Util.objectiveFunction(vehicles);
+    	double cost = objectiveFunction(vehicles);
     	System.out.println("----------------------------------------------------------------------------------------------------");
         for (int i = 0 ; i < vehicles.size() ; i++) {
             System.out.println("Véhicule n°" + (i + 1) + " : " + getRouteString(vehicles.get(i).getRoute()));

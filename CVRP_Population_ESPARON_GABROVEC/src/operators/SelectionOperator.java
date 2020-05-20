@@ -3,7 +3,6 @@ package operators;
 import java.util.ArrayList;
 
 import cvrp_population.Genetic;
-import cvrp_population.Util;
 import cvrp_population.Vehicle;
 
 public class SelectionOperator {
@@ -23,7 +22,7 @@ public class SelectionOperator {
 		for (int i = 0; i < nbParticipants; i++) {
 			participant = gen.getPopulation().get(gen.getRand().nextInt(gen.getPopulation().size()));
 			participants.add(participant);
-			cost = Util.objectiveFunction(participant);
+			cost = gen.objectiveFunction(participant);
 			costs.add(cost);
 			totalCost += cost;
 		}
