@@ -47,8 +47,9 @@ public class Genetic {
 		displayDescription();
 		int percentage = -1, newPercentage;
 		ArrayList<Vehicle> p1, p2;
+		ArrayList<ArrayList<Vehicle>> reproductedPopulation, childs;
 		for (int i = 0; i < nbGenerations; i++) {
-			ArrayList<ArrayList<Vehicle>> reproductedPopulation = selectionOperator.rouletteWheel();
+			reproductedPopulation = selectionOperator.rouletteWheel();
 			bestSolutionsReproduction();
 			while (population.size() < nbIndividuals) {
 				p1 = reproductedPopulation.get(rand.nextInt(reproductedPopulation.size()));
@@ -56,9 +57,9 @@ public class Genetic {
 					population.add(rand.nextDouble() < 0.5 ? mutationOperator.displacementMutation(p1) : mutationOperator.inversionMutation(p1));
 				} else {
 					p2 = reproductedPopulation.get(rand.nextInt(reproductedPopulation.size()));
-					ArrayList<ArrayList<Vehicle>> childs = crossoverOperator.oxCrossover(p1, p2);
+					childs = crossoverOperator.oxCrossover(p1, p2);
 					population.add(childs.get(0));
-					if (population.size() != nbIndividuals) {
+					if (population.size() < nbIndividuals) {
 						population.add(childs.get(1));
 					}
 				}
