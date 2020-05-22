@@ -50,14 +50,17 @@ public class Genetic {
 		for (int i = 0; i < nbGenerations; i++) {
 			ArrayList<ArrayList<Vehicle>> reproductedPopulation = selectionOperator.rouletteWheel();
 			bestSolutionsReproduction();
-			for (int j = nbBest + 1; j < nbIndividuals; j++) {
+			while (population.size() < nbIndividuals) {
 				p1 = reproductedPopulation.get(rand.nextInt(reproductedPopulation.size()));
 				if (rand.nextDouble() < pMutation) {
 					population.add(rand.nextDouble() < 0.5 ? mutationOperator.displacementMutation(p1) : mutationOperator.inversionMutation(p1));
 				} else {
 					p2 = reproductedPopulation.get(rand.nextInt(reproductedPopulation.size()));
-					population.addAll(crossoverOperator.oxCrossover(p1, p2));
-					i++;
+					ArrayList<ArrayList<Vehicle>> childs = crossoverOperator.oxCrossover(p1, p2);
+					population.add(childs.get(0));
+					if (population.size() != nbIndividuals) {
+						population.add(childs.get(1));
+					}
 				}
 			}
 			updateBestSolution();

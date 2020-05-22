@@ -31,10 +31,7 @@ public class MutationOperator {
 	public ArrayList<Vehicle> displacementMutation(ArrayList<Vehicle> individual) {
 		ArrayList<Location> locations = Util.getLocations(individual);
 		int a = gen.getRand().nextInt(locations.size());
-		int b;
-		do {
-			b = gen.getRand().nextInt(locations.size());
-		} while (Math.abs(a - b) == locations.size() - 1);
+		int b = gen.getRand().nextInt(locations.size());
 		int min = Math.min(a, b);
 		int max = Math.max(a, b);
 		ArrayList<Location> subList = new ArrayList<>();

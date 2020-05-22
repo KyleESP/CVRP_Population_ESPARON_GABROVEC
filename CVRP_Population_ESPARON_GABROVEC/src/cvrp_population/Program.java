@@ -10,10 +10,10 @@ public class Program {
 	private static final int NB_VEHICLES = 20;
 	private static final int MAX_VEHICLES_CAPACITY = 100;
 	
-	private static final long NB_GENERATIONS = 100000;
-	private static final int NB_INDIVIDUALS = 110;
-	private static final int NB_BEST = 100;
-	private static final double P_MUTATION = 0.2;
+	private static final long NB_GENERATIONS = 80000;
+	private static final int NB_INDIVIDUALS = 50;
+	private static final int NB_BEST = 25;
+	private static final double P_MUTATION = 0.09;
 	
 	private static final long NB_GENERATIONS_2 = 130000;
 	private static final int NB_INDIVIDUALS_2 = 30;
