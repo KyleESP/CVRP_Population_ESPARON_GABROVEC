@@ -58,14 +58,15 @@ public class CrossoverOperator {
 		HashMap<int[], Double> pCosts = getEdgesCosts(p1Locations);
 		ArrayList<Location> p2Locations = Util.getLocations(p2);
 		pCosts.putAll(getEdgesCosts(p2Locations));
-		ArrayList<Integer> child = new ArrayList<>();
-		child.add(p1Locations.get(0).getId());
-		int lastLocId = p1Locations.get(1).getId();
-		child.add(lastLocId);
 		double distance;
 		double minCost;
 		int[] minEdge, key;
 		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
+		
+		ArrayList<Integer> child = new ArrayList<>();
+		child.add(p1Locations.get(0).getId());
+		int lastLocId = p1Locations.get(1).getId();
+		child.add(lastLocId);
 		while (child.size() < p1Locations.size()) {
 			minCost = Double.POSITIVE_INFINITY;
 			minEdge = null;
@@ -88,8 +89,8 @@ public class CrossoverOperator {
 			child.add(lastLocId);
 		}
 		
-		ArrayList<Vehicle> newChild = gen.reconstruct(child);
-		return newChild;
+		ArrayList<Vehicle> reconstruction = gen.reconstruct(child);
+		return reconstruction;
 	}
 	
 	private HashMap<int[], Double> getEdgesCosts(ArrayList<Location> locations) {

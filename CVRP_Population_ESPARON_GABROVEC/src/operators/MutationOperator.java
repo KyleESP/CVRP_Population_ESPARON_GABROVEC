@@ -22,6 +22,7 @@ public class MutationOperator {
 		int b = gen.getRand().nextInt(locations.size());
 		int min = Math.min(a, b);
 		int max = Math.max(a, b);
+		
 		Collections.reverse(locations.subList(min, max));
 		
 		ArrayList<Vehicle> reconstruction = gen.reconstruct(locations);
@@ -34,13 +35,14 @@ public class MutationOperator {
 		int b = gen.getRand().nextInt(locations.size());
 		int min = Math.min(a, b);
 		int max = Math.max(a, b);
+		
 		ArrayList<Location> subList = new ArrayList<>();
 		for (int i = min; i < max; i++) {
 			subList.add(locations.get(i));
 		}
 		locations.removeAll(subList);
-		int newPosition = gen.getRand().nextInt(locations.size());
-		locations.addAll(newPosition, subList);
+		locations.addAll(gen.getRand().nextInt(locations.size()), subList);
+		
 		ArrayList<Vehicle> reconstruction = gen.reconstruct(locations);
 		return reconstruction;
 	}
