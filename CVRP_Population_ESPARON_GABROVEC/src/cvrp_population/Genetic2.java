@@ -9,7 +9,7 @@ import operators.MutationOperator;
 import operators.SelectionOperator;
 
 public class Genetic2 {
-	
+	/*
 	private CrossoverOperator crossoverOperator;
 	private MutationOperator mutationOperator;
 	private SelectionOperator selectionOperator;
@@ -273,5 +273,5 @@ public class Genetic2 {
     
     public ArrayList<Location> getLocations() {
     	return locations;
-    }
+    }*/
 }

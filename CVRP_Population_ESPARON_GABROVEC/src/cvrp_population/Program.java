@@ -10,16 +10,21 @@ public class Program {
 	private static final int NB_VEHICLES = 20;
 	private static final int MAX_VEHICLES_CAPACITY = 100;
 	
-	private static final long NB_GENERATIONS = 130000;
-	private static final int NB_INDIVIDUALS = 30;
-	private static final double P_MUTATION = 0.01;
+	private static final long NB_GENERATIONS = 100000;
+	private static final int NB_INDIVIDUALS = 110;
+	private static final int NB_BEST = 100;
+	private static final double P_MUTATION = 0.2;
+	
+	private static final long NB_GENERATIONS_2 = 130000;
+	private static final int NB_INDIVIDUALS_2 = 30;
+	private static final double P_MUTATION_2 = 0.01;
 	
 	public static void main(String[] args) {
 		HashMap<String, ArrayList<Vehicle>> routesList = new HashMap<>();
 		HashMap<String, ArrayList<Double>> costsHistories = new HashMap<>();
 	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE + ".txt");
 	    
-	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_MUTATION);
+	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, NB_BEST, P_MUTATION);
         genetic.exec();
         String descTabu = "Algorithme génétique (" + genetic.getInlineDescription() + ")";
         routesList.put(descTabu, genetic.getBestIndividual());

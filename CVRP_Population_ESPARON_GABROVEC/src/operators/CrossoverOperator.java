@@ -1,6 +1,7 @@
 package operators;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,41 @@ public class CrossoverOperator {
 	
 	public CrossoverOperator(Genetic gen) {
 		this.gen = gen;
+	}
+	
+	public ArrayList<ArrayList<Vehicle>> oxCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {
+		ArrayList<Location> p1Locations = Util.getLocations(p1);
+		ArrayList<Location> p2Locations = Util.getLocations(p2);
+		int firstPoint = gen.getRand().nextInt(p1Locations.size() - 1);
+		int secondPoint = gen.getRand().nextInt(p1Locations.size());
+		int minPoint = Math.min(firstPoint, secondPoint);
+		int maxPoint = Math.max(firstPoint, secondPoint);
+		ArrayList<Location> child1 = new ArrayList<>();
+		ArrayList<Location> child2 = new ArrayList<>();
+		child1.addAll(p1Locations.subList(minPoint, maxPoint));
+		child2.addAll(p2Locations.subList(minPoint, maxPoint));
+		
+		int currLocIdx = 0;
+		Location currLocP1, currLocP2;
+		for (int i = 0; i < p1Locations.size(); i++) {
+			currLocIdx = (maxPoint + i) % p1Locations.size();
+			currLocP1 = p1Locations.get(currLocIdx);
+			currLocP2 = p2Locations.get(currLocIdx);
+			if (!child1.contains(currLocP2)) {
+				child1.add(currLocP2);
+			}
+			if (!child2.contains(currLocP1)) {
+				child2.add(currLocP1);
+			}
+		}
+		
+		Collections.rotate(child1, minPoint);
+		Collections.rotate(child2, minPoint);
+		ArrayList<ArrayList<Vehicle>> childs = new ArrayList<>();
+		childs.add(gen.reconstruct(child1));
+		childs.add(gen.reconstruct(child2));
+		
+		return childs;
 	}
 	
 	public ArrayList<Vehicle> hGreXCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {

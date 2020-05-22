@@ -15,6 +15,7 @@ public class Genetic {
 	private SelectionOperator selectionOperator;
 	private long nbGenerations;
 	private int nbIndividuals;
+	private int nbBest;
 	private double pMutation;
 	private int maxCapacity;
 	private ArrayList<Location> locations;
@@ -24,10 +25,11 @@ public class Genetic {
     private ArrayList<Double> costsHistory;
 	private Random rand;
 	
-	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation) {
+	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pMutation) {
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
+    	this.nbBest = nbBest;
     	this.pMutation = pMutation;
     	population = new ArrayList<>(nbIndividuals);
     	this.locations = locations;
@@ -38,78 +40,42 @@ public class Genetic {
     	costsHistory = new ArrayList<>();
 		initPopulation();
 	}
-	
+    
     public void exec() {
 		bestCost = Double.POSITIVE_INFINITY;
 		updateBestSolution();
 		displayDescription();
-		double percentage;
-		ArrayList<Vehicle> parent1, parent2, child;
-		ArrayList<Vehicle> parentMutation, mutant;
+		int percentage = -1, newPercentage;
+		ArrayList<Vehicle> p1, p2;
 		for (int i = 0; i < nbGenerations; i++) {
-			parent1 = selectionOperator.tournament(3);
-			parent2 = selectionOperator.tournament(3);
-			child = crossoverOperator.hGreXCrossover(parent1, parent2);
-			setSimilarIndividual(child);
-			if (rand.nextDouble() <= pMutation) {
-				parentMutation = getRandomButNotBest();
-				mutant = mutationOperator.displacementMutation(parentMutation);
-				population.remove(parentMutation);
-				population.add(mutant);
+			ArrayList<ArrayList<Vehicle>> reproductedPopulation = selectionOperator.rouletteWheel();
+			bestSolutionsReproduction();
+			for (int j = nbBest + 1; j < nbIndividuals; j++) {
+				p1 = reproductedPopulation.get(rand.nextInt(reproductedPopulation.size()));
+				if (rand.nextDouble() < pMutation) {
+					population.add(rand.nextDouble() < 0.5 ? mutationOperator.displacementMutation(p1) : mutationOperator.inversionMutation(p1));
+				} else {
+					p2 = reproductedPopulation.get(rand.nextInt(reproductedPopulation.size()));
+					population.addAll(crossoverOperator.oxCrossover(p1, p2));
+					i++;
+				}
 			}
 			updateBestSolution();
-			percentage = ((double)(i + 1) / nbGenerations) * 100;
-        	if(percentage % 1 == 0) {
-        		System.out.println((int)percentage + "%");
-        	}
+			if ((newPercentage = (int)(((double)(i + 1) / nbGenerations) * 100)) != percentage) {
+				percentage = newPercentage;
+				System.out.println(percentage + "%");
+			}
 		}
-	    displaySolution(bestIndividual);
+		displaySolution(bestIndividual);
     }
-	
-	private ArrayList<Vehicle> getBestIndividualInCurrentPopulation() {
-		double fMin = Double.POSITIVE_INFINITY;
-		ArrayList<Vehicle> xMin = null;
-		double fCurr;
-		for (ArrayList<Vehicle> vehicles : population) {
-			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
-				fMin = fCurr;
-				xMin = vehicles;
-			}
+    
+    private void bestSolutionsReproduction() {
+		population.sort((idv1, idv2) -> Double.compare(objectiveFunction(idv1), objectiveFunction(idv2)));
+		ArrayList<ArrayList<Vehicle>> tmpPopulation = new ArrayList<>();
+		for (int i = 0; i < nbBest; i++) {
+			tmpPopulation.add(population.get(i));
 		}
-		return xMin;
-	}
-	
-	private ArrayList<Vehicle> getRandomButNotBest() {
-		ArrayList<Vehicle> bestIndividual = getBestIndividualInCurrentPopulation();
-		ArrayList<Vehicle> randomInd;
-		do {
-			randomInd = population.get(rand.nextInt(population.size()));
-		} while(randomInd != bestIndividual);
-		return randomInd;
-	}
-	
-	private void setSimilarIndividual(ArrayList<Vehicle> individual) {
-		double indCost = objectiveFunction(individual);
-		double currIndCost;
-		boolean indCostBetter;
-		boolean hasSimilar = false;
-		for (ArrayList<Vehicle> currInd : population) {
-			currIndCost = objectiveFunction(currInd);
-			indCostBetter = currIndCost < indCost;
-			if (Math.abs(currIndCost - indCost) / (indCostBetter ? currIndCost : indCost) < 0.01) {
-				if (indCostBetter) {
-					population.remove(currInd);
-					population.add(individual);
-				}
-				hasSimilar = true;
-				break;
-			}
-		}
-		if (!hasSimilar) {
-			ArrayList<Vehicle> badIndividual = selectionOperator.tournament(2);
-			population.remove(badIndividual);
-			population.add(individual);
-		}
+		population = tmpPopulation;
 	}
 	
 	private void initPopulation() {
@@ -273,5 +239,9 @@ public class Genetic {
     
     public ArrayList<Location> getLocations() {
     	return locations;
+    }
+    
+    public int getNbIndividuals() {
+    	return nbIndividuals;
     }
 }
