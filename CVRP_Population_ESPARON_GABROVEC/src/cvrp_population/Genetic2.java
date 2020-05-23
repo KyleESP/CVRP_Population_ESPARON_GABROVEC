@@ -9,7 +9,7 @@ import operators.MutationOperator;
 import operators.SelectionOperator;
 
 public class Genetic2 {
-	/*
+	
 	private CrossoverOperator crossoverOperator;
 	private MutationOperator mutationOperator;
 	private SelectionOperator selectionOperator;
@@ -43,7 +43,7 @@ public class Genetic2 {
 		bestCost = Double.POSITIVE_INFINITY;
 		updateBestSolution();
 		displayDescription();
-		double percentage;
+		int percentage = -1, newPercentage;
 		ArrayList<Vehicle> parent1, parent2, child;
 		ArrayList<Vehicle> parentMutation, mutant;
 		for (int i = 0; i < nbGenerations; i++) {
@@ -51,48 +51,47 @@ public class Genetic2 {
 			parent2 = selectionOperator.tournament(3);
 			child = crossoverOperator.hGreXCrossover(parent1, parent2);
 			setSimilarIndividual(child);
-			if (rand.nextDouble() <= pMutation) {
-				parentMutation = getRandomButNotBest();
-				mutant = mutationOperator.inversionMutation(parentMutation);
+			if (rand.nextDouble() < pMutation && (parentMutation = getRandomButNotBest()) != null) {
+				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(parentMutation) : mutationOperator.displacementMutation(parentMutation);
 				population.remove(parentMutation);
 				population.add(mutant);
 			}
 			updateBestSolution();
-			percentage = ((double)(i + 1) / nbGenerations) * 100;
-        	if(percentage % 1 == 0) {
-        		System.out.println((int)percentage + "%");
-        	}
+			if ((newPercentage = (int)(((double)(i + 1) / nbGenerations) * 100)) != percentage) {
+				percentage = newPercentage;
+				System.out.println(percentage + "%");
+			}
 		}
 	    displaySolution(bestIndividual);
     }
 	
-	private ArrayList<Vehicle> getBestIndividualInCurrentPopulation() {
-		double fMin = Double.POSITIVE_INFINITY;
-		ArrayList<Vehicle> xMin = null;
-		double fCurr;
+	private ArrayList<Vehicle> getRandomButNotBest() {
+		ArrayList<Double> costs = new ArrayList<>();
+		double fMin = Double.POSITIVE_INFINITY, fCurr;
 		for (ArrayList<Vehicle> vehicles : population) {
-			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
+			fCurr = objectiveFunction(vehicles);
+			costs.add(fCurr);
+			if (fCurr < fMin) {
 				fMin = fCurr;
-				xMin = vehicles;
 			}
 		}
-		return xMin;
-	}
-	
-	private ArrayList<Vehicle> getRandomButNotBest() {
-		ArrayList<Vehicle> bestIndividual = getBestIndividualInCurrentPopulation();
-		ArrayList<Vehicle> randomInd;
-		do {
-			randomInd = population.get(rand.nextInt(population.size()));
-		} while(randomInd != bestIndividual);
-		return randomInd;
+		ArrayList<ArrayList<Vehicle>> notBests = new ArrayList<>();
+		for (int i = 0; i < population.size(); i++) {
+			if (costs.get(i) != fMin) {
+				notBests.add(population.get(i));
+			}
+		}
+		ArrayList<Vehicle> randomIndividual = null;
+		if (!notBests.isEmpty()) {
+			randomIndividual = notBests.get(rand.nextInt(notBests.size()));
+		}
+		
+		return randomIndividual;
 	}
 	
 	private void setSimilarIndividual(ArrayList<Vehicle> individual) {
-		double indCost = objectiveFunction(individual);
-		double currIndCost;
-		boolean indCostBetter;
-		boolean hasSimilar = false;
+		double indCost = objectiveFunction(individual), currIndCost;
+		boolean indCostBetter, hasSimilar = false;
 		for (ArrayList<Vehicle> currInd : population) {
 			currIndCost = objectiveFunction(currInd);
 			indCostBetter = currIndCost < indCost;
@@ -120,7 +119,7 @@ public class Genetic2 {
 	        Vehicle v;
 	        ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
 	        Location depot = locationsCopy.get(0);
-	        Collections.shuffle(locationsCopy, new Random(i));
+	        Collections.shuffle(locationsCopy);
 	        while (hasAnUnroutedLocation(locationsCopy)) {
 	        	if (vIdx >= vehicles.size()) {
 	        		Vehicle newV = new Vehicle(maxCapacity);
@@ -148,18 +147,19 @@ public class Genetic2 {
     }
     
 	private boolean hasAnUnroutedLocation(ArrayList<Location> locations) {
+		boolean hasUnroutedLocation = false;
         for(Location l : locations) {
             if (!l.getIsRouted()) {
-            	return true;
+            	hasUnroutedLocation = true;
+            	break;
             }
         }
-        return false;
+        return hasUnroutedLocation;
     }
 	
 	private void updateBestSolution() {
-		double fMin = Double.POSITIVE_INFINITY;
+		double fMin = Double.POSITIVE_INFINITY, fCurr;
 		ArrayList<Vehicle> xMin = null;
-		double fCurr;
 		for (ArrayList<Vehicle> vehicles : population) {
 			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
 				fMin = fCurr;
@@ -273,5 +273,9 @@ public class Genetic2 {
     
     public ArrayList<Location> getLocations() {
     	return locations;
-    }*/
+    }
+    
+    public int getNbIndividuals() {
+    	return nbIndividuals;
+    }
 }

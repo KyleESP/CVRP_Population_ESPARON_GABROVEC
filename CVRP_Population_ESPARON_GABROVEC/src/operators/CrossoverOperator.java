@@ -6,15 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cvrp_population.Genetic;
+import cvrp_population.Genetic2;
 import cvrp_population.Location;
 import cvrp_population.Util;
 import cvrp_population.Vehicle;
 
 public class CrossoverOperator {
 	
-	private Genetic gen;
+	private Genetic2 gen;
 	
-	public CrossoverOperator(Genetic gen) {
+	public CrossoverOperator(Genetic2 gen) {
 		this.gen = gen;
 	}
 	

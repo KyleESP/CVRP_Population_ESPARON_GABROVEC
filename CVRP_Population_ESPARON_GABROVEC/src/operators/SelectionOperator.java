@@ -3,13 +3,14 @@ package operators;
 import java.util.ArrayList;
 
 import cvrp_population.Genetic;
+import cvrp_population.Genetic2;
 import cvrp_population.Vehicle;
 
 public class SelectionOperator {
 	
-	private Genetic gen;
+	private Genetic2 gen;
 	
-	public SelectionOperator(Genetic gen) {
+	public SelectionOperator(Genetic2 gen) {
 		this.gen = gen;
 	}
 	
