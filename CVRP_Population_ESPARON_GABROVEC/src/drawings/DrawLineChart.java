@@ -10,8 +10,9 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.util.ArrayList;
-import java.util.Collections;
 import javax.swing.JPanel;
+
+import cvrp_population.Util;
 
 public class DrawLineChart extends JPanel {
 
@@ -31,9 +32,9 @@ public class DrawLineChart extends JPanel {
     private Color bgColor = Color.WHITE;
     private int pointWidth = 4;
     private int numberYDivisions = 10;
-    private ArrayList<Double> scores;
+    private ArrayList<Object[]> scores;
 
-    public DrawLineChart(ArrayList<Double> scores) {
+    public DrawLineChart(ArrayList<Object[]> scores) {
         this.scores = scores;
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
     }
@@ -45,19 +46,29 @@ public class DrawLineChart extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
         int scoresSize = scores.size();
-        double minScore = Collections.min(scores);
-        double maxScore = Collections.max(scores);
+        double maxScore = Double.NEGATIVE_INFINITY;
+        double minScore = Double.POSITIVE_INFINITY;
+        double currScore;
+        for (int i = 0; i < scores.size(); i++) {
+        	currScore = (double)scores.get(i)[1];
+        	if (currScore < minScore) {
+        		minScore = currScore;
+        	}
+        	if (currScore > maxScore) {
+        		maxScore = currScore;
+        	}
+        }
         double xScale = ((double)getWidth() - (2 * padding) - labelPadding) / (scoresSize - 1);
         double yScale = ((double)getHeight() - 2 * padding - labelPadding) / (maxScore - minScore);
         
         ArrayList<Point> graphPoints = new ArrayList<>();
-        ArrayList<Point> minPoints = new ArrayList<>();
+        Point minPoint = null;
         for (int i = 0; i < scoresSize; i++) {
             int x1 = (int)(i * xScale + padding + labelPadding);
-            int y1 = (int)((maxScore - scores.get(i)) * yScale + padding);
+            int y1 = (int)((maxScore - (double)scores.get(i)[1]) * yScale + padding);
             Point p = new Point(x1, y1);
-            if (scores.get(i) == minScore) {
-            	minPoints.add(p);
+            if ((double)scores.get(i)[1] == minScore) {
+            	minPoint = p;
             }
             graphPoints.add(p);
         }
@@ -84,22 +95,19 @@ public class DrawLineChart extends JPanel {
         }
 
         for (int i = 0; i < scoresSize; i++) {
-            if (scoresSize > 1) {
-                int x0 = i * (getWidth() - padding * 2 - labelPadding) / (scoresSize - 1) + padding + labelPadding;
-                int x1 = x0;
-                int y0 = getHeight() - padding - labelPadding;
-                int y1 = y0 - pointWidth;
-                if ((i % ((int) ((scoresSize / 20.0)) + 1)) == 0) {
-                    g2d.setColor(gridColor);
-                    g2d.drawLine(x0, getHeight() - padding - labelPadding - 1 - pointWidth, x1, padding);
-                    g2d.setColor(Color.BLACK);
-                    String xLabel = i + "";
-                    FontMetrics metrics = g2d.getFontMetrics();
-                    int labelWidth = metrics.stringWidth(xLabel);
-                    g2d.drawString(xLabel, x0 - labelWidth / 2, y0 + metrics.getHeight() + 3);
-                }
-                g2d.drawLine(x0, y0, x1, y1);
-            }
+        	int iter = (int)scores.get(i)[0];
+            int x0 = i * (getWidth() - padding * 2 - labelPadding) / (scoresSize - 1) + padding + labelPadding;
+            int x1 = x0;
+            int y0 = getHeight() - padding - labelPadding;
+            int y1 = y0 - pointWidth;
+            g2d.setColor(gridColor);
+            g2d.drawLine(x0, getHeight() - padding - labelPadding - 1 - pointWidth, x1, padding);
+            g2d.setColor(Color.BLACK);
+            String xLabel = Util.formatInt(iter);
+            FontMetrics metrics = g2d.getFontMetrics();
+            int labelWidth = metrics.stringWidth(xLabel);
+            g2d.drawString(xLabel, x0 - labelWidth / 2, y0 + metrics.getHeight() + 3);
+            g2d.drawLine(x0, y0, x1, y1);
         }
 
         g2d.drawLine(padding + labelPadding, getHeight() - padding - labelPadding, padding + labelPadding, padding);
@@ -121,7 +129,7 @@ public class DrawLineChart extends JPanel {
         for (Point p : graphPoints) {
             int x = p.x - pointWidth / 2;
             int y = p.y - pointWidth / 2;
-            if (!minPoints.contains(p)) {
+            if (minPoint != p) {
             	g2d.fillOval(x, y, pointWidth, pointWidth);
             } else {
             	g2d.setColor(minPointsColor);

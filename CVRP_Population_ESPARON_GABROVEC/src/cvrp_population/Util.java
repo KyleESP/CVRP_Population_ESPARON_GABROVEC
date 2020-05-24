@@ -117,12 +117,12 @@ public abstract class Util {
         frame.setVisible(true);
 	}
 	
-	public static void drawLineCharts(String title, String parametersDesc, HashMap<String, ArrayList<Double>> bestCostsHistories) {
+	public static void drawLineCharts(String title, String parametersDesc, HashMap<String, ArrayList<Object[]>> bestCostsHistories) {
 		JFrame frame = new JFrame(title);
 		JPanel mainPanel = new JPanel();
 		mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(BorderFactory.createTitledBorder(parametersDesc));
-        for (Map.Entry<String, ArrayList<Double>> entry : bestCostsHistories.entrySet()) {
+        for (Map.Entry<String, ArrayList<Object[]>> entry : bestCostsHistories.entrySet()) {
         	DrawLineChart lineChart = new DrawLineChart(entry.getValue());
         	lineChart.setPreferredSize(new Dimension(900, 650));
         	Border border = BorderFactory.createTitledBorder(entry.getKey());
@@ -158,4 +158,25 @@ public abstract class Util {
 		}
         return copy;
     }
+
+	public static String formatInt(int number) {
+		char[] suffixes = {'k', 'm', 'g', 't', 'p', 'e' };
+		String string = String.valueOf(number);
+	    if(number < 1000) {
+	        return string;
+	    }
+	    int magnitude = (string.length() - 1) / 3;
+	    int digits = (string.length() - 1) % 3 + 1;
+	    char[] value = new char[4];
+	    for(int i = 0; i < digits; i++) {
+	        value[i] = string.charAt(i);
+	    }
+	    int valueLength = digits;
+	    if(digits == 1 && string.charAt(1) != '0') {
+	        value[valueLength++] = '.';
+	        value[valueLength++] = string.charAt(1);
+	    }
+	    value[valueLength++] = suffixes[magnitude - 1];
+	    return new String(value, 0, valueLength);
+	}
 }

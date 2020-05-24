@@ -21,7 +21,7 @@ public class Genetic2 {
 	private ArrayList<ArrayList<Vehicle>> population;
     private ArrayList<Vehicle> bestIndividual;
     private double bestCost;
-    private ArrayList<Double> costsHistory;
+    private ArrayList<Object[]> costsHistory;
 	private Random rand;
 	
 	public Genetic2(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation) {
@@ -41,7 +41,7 @@ public class Genetic2 {
 	
     public void exec() {
 		bestCost = Double.POSITIVE_INFINITY;
-		updateBestSolution();
+		updateBestSolution(0);
 		displayDescription();
 		int percentage = -1, newPercentage;
 		ArrayList<Vehicle> parent1, parent2, child;
@@ -56,7 +56,7 @@ public class Genetic2 {
 				population.remove(parentMutation);
 				population.add(mutant);
 			}
-			updateBestSolution();
+			updateBestSolution(i + 1);
 			if ((newPercentage = (int)(((double)(i + 1) / nbGenerations) * 100)) != percentage) {
 				percentage = newPercentage;
 				System.out.println(percentage + "%");
@@ -157,7 +157,7 @@ public class Genetic2 {
         return hasUnroutedLocation;
     }
 	
-	private void updateBestSolution() {
+	private void updateBestSolution(int i) {
 		double fMin = Double.POSITIVE_INFINITY, fCurr;
 		ArrayList<Vehicle> xMin = null;
 		for (ArrayList<Vehicle> vehicles : population) {
@@ -169,8 +169,8 @@ public class Genetic2 {
 		if (fMin < bestCost) {
 			bestCost = fMin;
 			bestIndividual = xMin;
+			costsHistory.add(new Object[] {i, bestCost});
 		}
-    	costsHistory.add(bestCost);
 	}
 	
 	public <T> ArrayList<Vehicle> reconstruct(ArrayList<T> brokenLocations) {
@@ -259,7 +259,7 @@ public class Genetic2 {
     	return bestCost;
     }
     
-    public ArrayList<Double> getCostsHistory() {
+    public ArrayList<Object[]> getCostsHistory() {
     	return costsHistory;
     }
     

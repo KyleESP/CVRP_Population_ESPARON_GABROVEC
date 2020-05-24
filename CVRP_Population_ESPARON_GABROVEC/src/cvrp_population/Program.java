@@ -15,13 +15,13 @@ public class Program {
 	private static final int NB_BEST = 10;
 	private static final double P_MUTATION = 0.01;
 	
-	private static final long NB_GENERATIONS_2 = 3000000;
+	private static final long NB_GENERATIONS_2 = 10000;
 	private static final int NB_INDIVIDUALS_2 = 30;
 	private static final double P_MUTATION_2 = 0.01;
 	
 	public static void main(String[] args) {
 		HashMap<String, ArrayList<Vehicle>> routesList = new HashMap<>();
-		HashMap<String, ArrayList<Double>> costsHistories = new HashMap<>();
+		HashMap<String, ArrayList<Object[]>> costsHistories = new HashMap<>();
 	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE + ".txt");
 	    
 	    Genetic2 genetic = new Genetic2(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS_2, NB_INDIVIDUALS_2, P_MUTATION_2);
