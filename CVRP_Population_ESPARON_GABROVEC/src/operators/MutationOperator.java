@@ -21,30 +21,17 @@ public class MutationOperator {
 		ArrayList<Location> locations = Util.getLocations(individual);
 		int a = gen.getRand().nextInt(locations.size());
 		int b = gen.getRand().nextInt(locations.size());
-		int min = Math.min(a, b);
-		int max = Math.max(a, b);
-		
-		Collections.reverse(locations.subList(min, max));
-		
-		ArrayList<Vehicle> reconstruction = gen.reconstruct(locations);
-		return reconstruction;
+		Collections.reverse(locations.subList(Math.min(a, b), Math.max(a, b)));
+		return gen.reconstruct(locations);
 	}
 	
 	public ArrayList<Vehicle> displacementMutation(ArrayList<Vehicle> individual) {
 		ArrayList<Location> locations = Util.getLocations(individual);
 		int a = gen.getRand().nextInt(locations.size());
 		int b = gen.getRand().nextInt(locations.size());
-		int min = Math.min(a, b);
-		int max = Math.max(a, b);
-		
-		ArrayList<Location> subList = new ArrayList<>();
-		for (int i = min; i < max; i++) {
-			subList.add(locations.get(i));
-		}
+		ArrayList<Location> subList = new ArrayList<>(locations.subList(Math.min(a, b), Math.max(a, b)));
 		locations.removeAll(subList);
 		locations.addAll(gen.getRand().nextInt(locations.size()), subList);
-		
-		ArrayList<Vehicle> reconstruction = gen.reconstruct(locations);
-		return reconstruction;
+		return gen.reconstruct(locations);
 	}
 }
