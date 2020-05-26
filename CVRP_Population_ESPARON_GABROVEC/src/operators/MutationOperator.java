@@ -3,17 +3,17 @@ package operators;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import cvrp_population.Genetic;
 import cvrp_population.Genetic2;
+import cvrp_population.Genetic;
 import cvrp_population.Location;
 import cvrp_population.Util;
 import cvrp_population.Vehicle;
 
 public class MutationOperator {
 	
-	private Genetic2 gen;
+	private Genetic gen;
 	
-	public MutationOperator(Genetic2 gen) {
+	public MutationOperator(Genetic gen) {
 		this.gen = gen;
 	}
 	

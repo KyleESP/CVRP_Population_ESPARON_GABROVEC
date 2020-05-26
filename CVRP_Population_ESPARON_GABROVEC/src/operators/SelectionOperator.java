@@ -2,15 +2,15 @@ package operators;
 
 import java.util.ArrayList;
 
-import cvrp_population.Genetic;
 import cvrp_population.Genetic2;
+import cvrp_population.Genetic;
 import cvrp_population.Vehicle;
 
 public class SelectionOperator {
 	
-	private Genetic2 gen;
+	private Genetic gen;
 	
-	public SelectionOperator(Genetic2 gen) {
+	public SelectionOperator(Genetic gen) {
 		this.gen = gen;
 	}
 	
@@ -36,8 +36,7 @@ public class SelectionOperator {
 	
 	public ArrayList<ArrayList<Vehicle>> rouletteWheel() {
 		ArrayList<Double> costs = new ArrayList<>();
-		double totalCost = 0;
-		double cost;
+		double totalCost = 0, cost;
 		for (ArrayList<Vehicle> individual : gen.getPopulation()) {
 			cost = gen.objectiveFunction(individual);
 			costs.add(cost);

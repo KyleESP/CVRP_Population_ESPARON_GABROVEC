@@ -15,21 +15,19 @@ public class Genetic {
 	private SelectionOperator selectionOperator;
 	private long nbGenerations;
 	private int nbIndividuals;
-	private int nbBest;
 	private double pMutation;
 	private int maxCapacity;
 	private ArrayList<Location> locations;
 	private ArrayList<ArrayList<Vehicle>> population;
     private ArrayList<Vehicle> bestIndividual;
     private double bestCost;
-    private ArrayList<Double> costsHistory;
+    private ArrayList<Object[]> costsHistory;
 	private Random rand;
 	
-	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pMutation) {
+	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation) {
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
-    	this.nbBest = nbBest;
     	this.pMutation = pMutation;
     	population = new ArrayList<>(nbIndividuals);
     	this.locations = locations;
@@ -40,46 +38,77 @@ public class Genetic {
     	costsHistory = new ArrayList<>();
 		initPopulation();
 	}
-    
+	
     public void exec() {
 		bestCost = Double.POSITIVE_INFINITY;
-		updateBestSolution();
+		updateBestIndividual(0);
 		displayDescription();
 		int percentage = -1, newPercentage;
-		ArrayList<Vehicle> p1, p2;
-		ArrayList<ArrayList<Vehicle>> reproductedPopulation, childs;
+		ArrayList<Vehicle> parent1, parent2, child;
+		ArrayList<Vehicle> parentMutation, mutant;
 		for (int i = 0; i < nbGenerations; i++) {
-			reproductedPopulation = selectionOperator.rouletteWheel();
-			bestSolutionsReproduction();
-			while (population.size() < nbIndividuals) {
-				p1 = reproductedPopulation.get(rand.nextInt(reproductedPopulation.size()));
-				if (rand.nextDouble() < pMutation) {
-					population.add(rand.nextDouble() < 0.5 ? mutationOperator.displacementMutation(p1) : mutationOperator.inversionMutation(p1));
-				} else {
-					p2 = reproductedPopulation.get(rand.nextInt(reproductedPopulation.size()));
-					childs = crossoverOperator.oxCrossover(p1, p2);
-					population.add(childs.get(0));
-					if (population.size() < nbIndividuals) {
-						population.add(childs.get(1));
-					}
-				}
+			parent1 = selectionOperator.tournament(3);
+			parent2 = selectionOperator.tournament(3);
+			child = crossoverOperator.hGreXCrossover(parent1, parent2);
+			setSimilarIndividual(child);
+			if (rand.nextDouble() < pMutation && (parentMutation = getRandomButNotBest()) != null) {
+				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(parentMutation) : mutationOperator.displacementMutation(parentMutation);
+				population.remove(parentMutation);
+				population.add(mutant);
 			}
-			updateBestSolution();
+			updateBestIndividual(i + 1);
 			if ((newPercentage = (int)(((double)(i + 1) / nbGenerations) * 100)) != percentage) {
 				percentage = newPercentage;
 				System.out.println(percentage + "%");
 			}
 		}
-		displaySolution(bestIndividual);
+	    displayIndividual(bestIndividual);
     }
-    
-    private void bestSolutionsReproduction() {
-		population.sort((idv1, idv2) -> Double.compare(objectiveFunction(idv1), objectiveFunction(idv2)));
-		ArrayList<ArrayList<Vehicle>> tmpPopulation = new ArrayList<>();
-		for (int i = 0; i < nbBest; i++) {
-			tmpPopulation.add(population.get(i));
+	
+	private ArrayList<Vehicle> getRandomButNotBest() {
+		ArrayList<Double> costs = new ArrayList<>();
+		double fMin = Double.POSITIVE_INFINITY, fCurr;
+		for (ArrayList<Vehicle> vehicles : population) {
+			fCurr = objectiveFunction(vehicles);
+			costs.add(fCurr);
+			if (fCurr < fMin) {
+				fMin = fCurr;
+			}
 		}
-		population = tmpPopulation;
+		ArrayList<ArrayList<Vehicle>> notBests = new ArrayList<>();
+		for (int i = 0; i < population.size(); i++) {
+			if (costs.get(i) != fMin) {
+				notBests.add(population.get(i));
+			}
+		}
+		ArrayList<Vehicle> randomIndividual = null;
+		if (!notBests.isEmpty()) {
+			randomIndividual = notBests.get(rand.nextInt(notBests.size()));
+		}
+		
+		return randomIndividual;
+	}
+	
+	private void setSimilarIndividual(ArrayList<Vehicle> individual) {
+		double indCost = objectiveFunction(individual), currIndCost;
+		boolean indCostBetter, hasSimilar = false;
+		for (ArrayList<Vehicle> currInd : population) {
+			currIndCost = objectiveFunction(currInd);
+			indCostBetter = currIndCost < indCost;
+			if (Math.abs(currIndCost - indCost) / (indCostBetter ? currIndCost : indCost) < 0.01) {
+				if (indCostBetter) {
+					population.remove(currInd);
+					population.add(individual);
+				}
+				hasSimilar = true;
+				break;
+			}
+		}
+		if (!hasSimilar) {
+			ArrayList<Vehicle> badIndividual = selectionOperator.tournament(2);
+			population.remove(badIndividual);
+			population.add(individual);
+		}
 	}
 	
 	private void initPopulation() {
@@ -89,8 +118,8 @@ public class Genetic {
 	        int vIdx = 0;
 	        Vehicle v;
 	        ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
-	        Location depot = locationsCopy.get(0);
-	        Collections.shuffle(locationsCopy, new Random(i));
+	        Location depot = Util.getLocationById(0, locationsCopy);
+	        Collections.shuffle(locationsCopy);
 	        while (hasAnUnroutedLocation(locationsCopy)) {
 	        	if (vIdx >= vehicles.size()) {
 	        		Vehicle newV = new Vehicle(maxCapacity);
@@ -105,7 +134,6 @@ public class Genetic {
 	                    choseLocation = l;
 	            	}
 	            }
-	            
 	            if(choseLocation != null) {
 	            	v.routeLocation(choseLocation);
 	            } else {
@@ -118,18 +146,19 @@ public class Genetic {
     }
     
 	private boolean hasAnUnroutedLocation(ArrayList<Location> locations) {
+		boolean hasUnroutedLocation = false;
         for(Location l : locations) {
             if (!l.getIsRouted()) {
-            	return true;
+            	hasUnroutedLocation = true;
+            	break;
             }
         }
-        return false;
+        return hasUnroutedLocation;
     }
 	
-	private void updateBestSolution() {
-		double fMin = Double.POSITIVE_INFINITY;
+	private void updateBestIndividual(int i) {
+		double fMin = Double.POSITIVE_INFINITY, fCurr;
 		ArrayList<Vehicle> xMin = null;
-		double fCurr;
 		for (ArrayList<Vehicle> vehicles : population) {
 			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
 				fMin = fCurr;
@@ -139,34 +168,32 @@ public class Genetic {
 		if (fMin < bestCost) {
 			bestCost = fMin;
 			bestIndividual = xMin;
+			costsHistory.add(new Object[] {i, bestCost});
 		}
-    	costsHistory.add(bestCost);
 	}
 	
-	public <T> ArrayList<Vehicle> reconstruct(ArrayList<T> brokenLocations) {
-		ArrayList<Vehicle> newChild = new ArrayList<>();
+	public <T> ArrayList<Vehicle> reconstruct(ArrayList<T> reconstructibleLocations) {
+		ArrayList<Vehicle> reconstructedLocations = new ArrayList<>();
+		Location depot = Util.getLocationById(0, locations), l;
 		Vehicle v = new Vehicle(maxCapacity);
-		Location depot = Util.getLocationById(0, locations);
 		v.routeLocation(depot);
-		Location l;
-		for (int i = 0; i < brokenLocations.size(); i++) {
-			l = (brokenLocations.get(i) instanceof Integer) ? Util.getLocationById((Integer)brokenLocations.get(i), locations) : (Location)brokenLocations.get(i);
+		for (int i = 0; i < reconstructibleLocations.size(); i++) {
+			l = (reconstructibleLocations.get(i) instanceof Integer) ? Util.getLocationById((Integer)reconstructibleLocations.get(i), locations) : (Location)reconstructibleLocations.get(i);
 			if (!v.routeLocation(l)) {
 				v.routeLocation(depot);
-				newChild.add(v);
+				reconstructedLocations.add(v);
 				v = new Vehicle(maxCapacity);
 				v.routeLocation(depot);
 				v.routeLocation(l);
 			}
 		}
 		v.routeLocation(depot);
-		newChild.add(v);
-		return newChild;
+		reconstructedLocations.add(v);
+		return reconstructedLocations;
 	}
 	
 	public double objectiveFunction(ArrayList<Vehicle> vehicles) {
-		double sumDist = 0;
-    	double sumVehicles = 0;
+		double sumDist = 0, sumVehicles = 0;
     	ArrayList<Location> route;
     	for(Vehicle v : vehicles) {
     		route = v.getRoute();
@@ -198,13 +225,12 @@ public class Genetic {
 		return description;
 	}
 	
-    public void displaySolution(ArrayList<Vehicle> vehicles) {
-    	double cost = objectiveFunction(vehicles);
+    public void displayIndividual(ArrayList<Vehicle> vehicles) {
     	System.out.println("----------------------------------------------------------------------------------------------------");
         for (int i = 0 ; i < vehicles.size() ; i++) {
             System.out.println("Véhicule n°" + (i + 1) + " : " + getRouteString(vehicles.get(i).getRoute()));
         }
-        System.out.println("\nCoût de la solution : " + cost);
+        System.out.println("\nCoût de la solution : " + objectiveFunction(vehicles));
     	System.out.println("----------------------------------------------------------------------------------------------------");
     }
     
@@ -229,7 +255,7 @@ public class Genetic {
     	return bestCost;
     }
     
-    public ArrayList<Double> getCostsHistory() {
+    public ArrayList<Object[]> getCostsHistory() {
     	return costsHistory;
     }
     

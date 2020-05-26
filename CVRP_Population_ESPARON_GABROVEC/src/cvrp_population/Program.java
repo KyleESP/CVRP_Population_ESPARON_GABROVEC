@@ -24,7 +24,7 @@ public class Program {
 		HashMap<String, ArrayList<Object[]>> costsHistories = new HashMap<>();
 	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE + ".txt");
 	    
-	    Genetic2 genetic = new Genetic2(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS_2, NB_INDIVIDUALS_2, P_MUTATION_2);
+	    Genetic genetic = new Genetic(locations, NB_VEHICLES, MAX_VEHICLES_CAPACITY, NB_GENERATIONS_2, NB_INDIVIDUALS_2, P_MUTATION_2);
         genetic.exec();
         String descTabu = "Algorithme génétique (" + genetic.getInlineDescription() + ")";
         routesList.put(descTabu, genetic.getBestIndividual());

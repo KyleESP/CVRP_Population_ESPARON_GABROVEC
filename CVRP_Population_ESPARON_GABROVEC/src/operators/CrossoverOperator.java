@@ -5,17 +5,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import cvrp_population.Genetic;
 import cvrp_population.Genetic2;
+import cvrp_population.Genetic;
 import cvrp_population.Location;
 import cvrp_population.Util;
 import cvrp_population.Vehicle;
 
 public class CrossoverOperator {
 	
-	private Genetic2 gen;
+	private Genetic gen;
 	
-	public CrossoverOperator(Genetic2 gen) {
+	public CrossoverOperator(Genetic gen) {
 		this.gen = gen;
 	}
 	
@@ -59,8 +59,7 @@ public class CrossoverOperator {
 		HashMap<int[], Double> pCosts = getEdgesCosts(p1Locations);
 		ArrayList<Location> p2Locations = Util.getLocations(p2);
 		pCosts.putAll(getEdgesCosts(p2Locations));
-		double distance;
-		double minCost;
+		double distance, minCost;
 		int[] minEdge, key;
 		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
 		
@@ -68,6 +67,7 @@ public class CrossoverOperator {
 		child.add(p1Locations.get(0).getId());
 		int lastLocId = p1Locations.get(1).getId();
 		child.add(lastLocId);
+		
 		while (child.size() < p1Locations.size()) {
 			minCost = Double.POSITIVE_INFINITY;
 			minEdge = null;
@@ -90,22 +90,18 @@ public class CrossoverOperator {
 			child.add(lastLocId);
 		}
 		
-		ArrayList<Vehicle> reconstruction = gen.reconstruct(child);
-		return reconstruction;
+		return gen.reconstruct(child);
 	}
 	
 	private HashMap<int[], Double> getEdgesCosts(ArrayList<Location> locations) {
 		HashMap<int[], Double> edgesCosts = new HashMap<>();
-		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
 		int idSource, idDest;
 		double distance;
-		int[] edge;
 		for (int i = 0; i < locations.size() - 1; i++) {
 			idSource = locations.get(i).getId();
 			idDest = locations.get(i + 1).getId();
-			edge = new int[] {idSource, idDest};
-			distance = distances.get(idSource).get(idDest);
-			edgesCosts.put(edge, distance);
+			distance = Util.getDistances().get(idSource).get(idDest);
+			edgesCosts.put(new int[] {idSource, idDest}, distance);
 		}
 		return edgesCosts;
 	}
