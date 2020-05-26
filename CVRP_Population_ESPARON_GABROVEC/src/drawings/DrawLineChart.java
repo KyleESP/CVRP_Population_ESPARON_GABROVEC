@@ -27,7 +27,6 @@ public class DrawLineChart extends JPanel {
     private int labelPadding = 25;
     private Color lineColor = new Color(44, 102, 230, 180);
     private Color pointColor = new Color(100, 100, 100, 180);
-    private Color minPointsColor = Color.RED;
     private Color gridColor = new Color(200, 200, 200, 200);
     private Color bgColor = Color.WHITE;
     private int pointWidth = 4;
@@ -62,15 +61,10 @@ public class DrawLineChart extends JPanel {
         double yScale = ((double)getHeight() - 2 * padding - labelPadding) / (maxScore - minScore);
         
         ArrayList<Point> graphPoints = new ArrayList<>();
-        Point minPoint = null;
         for (int i = 0; i < scoresSize; i++) {
             int x1 = (int)(i * xScale + padding + labelPadding);
             int y1 = (int)((maxScore - (double)scores.get(i)[1]) * yScale + padding);
-            Point p = new Point(x1, y1);
-            if ((double)scores.get(i)[1] == minScore) {
-            	minPoint = p;
-            }
-            graphPoints.add(p);
+            graphPoints.add(new Point(x1, y1));
         }
 
         g2d.setColor(bgColor);
@@ -129,13 +123,7 @@ public class DrawLineChart extends JPanel {
         for (Point p : graphPoints) {
             int x = p.x - pointWidth / 2;
             int y = p.y - pointWidth / 2;
-            if (minPoint != p) {
-            	g2d.fillOval(x, y, pointWidth, pointWidth);
-            } else {
-            	g2d.setColor(minPointsColor);
-            	g2d.fillOval(x, y - 2, pointWidth + 2, pointWidth + 2);
-                g2d.setColor(pointColor);
-            }
+            g2d.fillOval(x, y, pointWidth, pointWidth);
         }
     }
 }

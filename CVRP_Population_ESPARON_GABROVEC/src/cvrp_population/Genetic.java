@@ -24,7 +24,7 @@ public class Genetic {
     private ArrayList<Object[]> costsHistory;
 	private Random rand;
 	
-	public Genetic(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation) {
+	public Genetic(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation) {
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
@@ -168,6 +168,8 @@ public class Genetic {
 		if (fMin < bestCost) {
 			bestCost = fMin;
 			bestIndividual = xMin;
+			costsHistory.add(new Object[] {i, bestCost});
+		} else if (i == nbGenerations) {
 			costsHistory.add(new Object[] {i, bestCost});
 		}
 	}

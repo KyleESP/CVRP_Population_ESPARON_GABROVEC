@@ -25,7 +25,7 @@ public class Genetic2 {
     private ArrayList<Object[]> costsHistory;
 	private Random rand;
 	
-	public Genetic2(ArrayList<Location> locations, int nbVehicles, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pMutation) {
+	public Genetic2(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pMutation) {
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
@@ -140,27 +140,29 @@ public class Genetic2 {
 			bestCost = fMin;
 			bestIndividual = xMin;
 			costsHistory.add(new Object[] {i, bestCost});
+		} else if (i == nbGenerations) {
+			costsHistory.add(new Object[] {i, bestCost});
 		}
 	}
 	
-	public <T> ArrayList<Vehicle> reconstruct(ArrayList<T> brokenLocations) {
-		ArrayList<Vehicle> newChild = new ArrayList<>();
-		Vehicle v = new Vehicle(maxCapacity);
+	public <T> ArrayList<Vehicle> reconstruct(ArrayList<T> reconstructibleLocations) {
+		ArrayList<Vehicle> reconstructedLocations = new ArrayList<>();
 		Location depot = Util.getLocationById(0, locations), l;
+		Vehicle v = new Vehicle(maxCapacity);
 		v.routeLocation(depot);
-		for (int i = 0; i < brokenLocations.size(); i++) {
-			l = (brokenLocations.get(i) instanceof Integer) ? Util.getLocationById((Integer)brokenLocations.get(i), locations) : (Location)brokenLocations.get(i);
+		for (int i = 0; i < reconstructibleLocations.size(); i++) {
+			l = (reconstructibleLocations.get(i) instanceof Integer) ? Util.getLocationById((Integer)reconstructibleLocations.get(i), locations) : (Location)reconstructibleLocations.get(i);
 			if (!v.routeLocation(l)) {
 				v.routeLocation(depot);
-				newChild.add(v);
+				reconstructedLocations.add(v);
 				v = new Vehicle(maxCapacity);
 				v.routeLocation(depot);
 				v.routeLocation(l);
 			}
 		}
 		v.routeLocation(depot);
-		newChild.add(v);
-		return newChild;
+		reconstructedLocations.add(v);
+		return reconstructedLocations;
 	}
 	
 	public double objectiveFunction(ArrayList<Vehicle> vehicles) {
