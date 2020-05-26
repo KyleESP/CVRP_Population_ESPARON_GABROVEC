@@ -1,14 +1,12 @@
 package cvrp_population;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -78,12 +76,14 @@ public abstract class Util {
     }
     
     public static Location getLocationById(int id, ArrayList<Location> locations) {
-		for (Location l : locations) {
-			if (l.getId() == id) {
-				return l;
+    	Location l = null;
+		for (Location currLoc : locations) {
+			if (currLoc.getId() == id) {
+				l = currLoc;
+				break;
 			}
 		}
-		return null;
+		return l;
 	}
     
     public static ArrayList<Location> getLocations(ArrayList<Vehicle> individual) {
@@ -98,17 +98,15 @@ public abstract class Util {
 		return locations;
 	}
     
-	public static void drawGraphs(String title, String parametersDesc, HashMap<String, ArrayList<Vehicle>> routesList) {
+	public static void drawGraph(String title, String parametersDesc, String desc, ArrayList<Vehicle> individual) {
 		JFrame frame = new JFrame(title);
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(BorderFactory.createTitledBorder(parametersDesc));
-        for (Map.Entry<String, ArrayList<Vehicle>> entry : routesList.entrySet()) {
-        	JPanel graph = new DrawGraph(entry.getValue());
-        	Border border = BorderFactory.createTitledBorder(entry.getKey());
-        	graph.setBorder(border);
-        	mainPanel.add(graph);
-        }
+    	JPanel graph = new DrawGraph(individual);
+    	Border border = BorderFactory.createTitledBorder(desc);
+    	graph.setBorder(border);
+    	mainPanel.add(graph);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.add(mainPanel);
@@ -117,38 +115,19 @@ public abstract class Util {
         frame.setVisible(true);
 	}
 	
-	public static void drawLineCharts(String title, String parametersDesc, HashMap<String, ArrayList<Object[]>> bestCostsHistories) {
+	public static void drawLineChart(String title, String parametersDesc, String desc, ArrayList<Object[]> bestCostsHistory) {
 		JFrame frame = new JFrame(title);
 		JPanel mainPanel = new JPanel();
 		mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(BorderFactory.createTitledBorder(parametersDesc));
-        for (Map.Entry<String, ArrayList<Object[]>> entry : bestCostsHistories.entrySet()) {
-        	DrawLineChart lineChart = new DrawLineChart(entry.getValue());
-        	lineChart.setPreferredSize(new Dimension(900, 650));
-        	Border border = BorderFactory.createTitledBorder(entry.getKey());
-        	lineChart.setBorder(border);
-        	mainPanel.add(lineChart);
-        }
+    	DrawLineChart lineChart = new DrawLineChart(bestCostsHistory);
+    	Border border = BorderFactory.createTitledBorder(desc);
+    	lineChart.setBorder(border);
+    	mainPanel.add(lineChart);
         frame.add(mainPanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-    }
-	
-	public static ArrayList<Vehicle> createDeepCopyVehicles(ArrayList<Vehicle> source) {
-    	ArrayList<Vehicle> copy = new ArrayList<>();
-        for (Vehicle v : source) {
-        	copy.add(new Vehicle(v));
-        }
-        return copy;
-    }
-	
-	public static ArrayList<ArrayList<Vehicle>> createDeepCopyPopulation(ArrayList<ArrayList<Vehicle>> source) {
-    	ArrayList<ArrayList<Vehicle>> copy = new ArrayList<>();
-        for (ArrayList<Vehicle> vs : source) {
-        	copy.add(createDeepCopyVehicles(vs));
-        }
-        return copy;
     }
 	
 	public static ArrayList<Location> createDeepCopyLocations(ArrayList<Location> source) {

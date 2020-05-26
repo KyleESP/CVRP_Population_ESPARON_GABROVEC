@@ -2,15 +2,15 @@ package operators;
 
 import java.util.ArrayList;
 
-import cvrp_population.Genetic2;
-import cvrp_population.Genetic;
+import cvrp_population.GeneticAlgorithm2;
+import cvrp_population.GeneticAlgorithm;
 import cvrp_population.Vehicle;
 
 public class SelectionOperator {
 	
-	private Genetic gen;
+	private GeneticAlgorithm gen;
 	
-	public SelectionOperator(Genetic gen) {
+	public SelectionOperator(GeneticAlgorithm gen) {
 		this.gen = gen;
 	}
 	

@@ -5,17 +5,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import cvrp_population.Genetic2;
-import cvrp_population.Genetic;
+import cvrp_population.GeneticAlgorithm2;
+import cvrp_population.GeneticAlgorithm;
 import cvrp_population.Location;
 import cvrp_population.Util;
 import cvrp_population.Vehicle;
 
 public class CrossoverOperator {
 	
-	private Genetic gen;
+	private GeneticAlgorithm gen;
 	
-	public CrossoverOperator(Genetic gen) {
+	public CrossoverOperator(GeneticAlgorithm gen) {
 		this.gen = gen;
 	}
 	

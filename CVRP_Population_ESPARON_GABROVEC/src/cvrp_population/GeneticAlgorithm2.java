@@ -8,7 +8,7 @@ import operators.CrossoverOperator;
 import operators.MutationOperator;
 import operators.SelectionOperator;
 
-public class Genetic2 {
+public class GeneticAlgorithm2 {
 	
 	private CrossoverOperator crossoverOperator;
 	private MutationOperator mutationOperator;
@@ -22,10 +22,10 @@ public class Genetic2 {
 	private ArrayList<ArrayList<Vehicle>> population;
     private ArrayList<Vehicle> bestIndividual;
     private double bestCost;
-    private ArrayList<Object[]> costsHistory;
+    private ArrayList<Object[]> bestCostsHistory;
 	private Random rand;
 	
-	public Genetic2(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pMutation) {
+	public GeneticAlgorithm2(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, int nbBest, double pMutation) {
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
@@ -37,7 +37,7 @@ public class Genetic2 {
     	/*selectionOperator = new SelectionOperator(this);
     	mutationOperator = new MutationOperator(this);
     	crossoverOperator = new CrossoverOperator(this);*/
-    	costsHistory = new ArrayList<>();
+    	bestCostsHistory = new ArrayList<>();
 		initPopulation();
 	}
     
@@ -139,9 +139,9 @@ public class Genetic2 {
 		if (fMin < bestCost) {
 			bestCost = fMin;
 			bestIndividual = xMin;
-			costsHistory.add(new Object[] {i, bestCost});
+			bestCostsHistory.add(new Object[] {i, bestCost});
 		} else if (i == nbGenerations) {
-			costsHistory.add(new Object[] {i, bestCost});
+			bestCostsHistory.add(new Object[] {i, bestCost});
 		}
 	}
 	
@@ -228,8 +228,8 @@ public class Genetic2 {
     	return bestCost;
     }
     
-    public ArrayList<Object[]> getCostsHistory() {
-    	return costsHistory;
+    public ArrayList<Object[]> getBestCostsHistory() {
+    	return bestCostsHistory;
     }
     
     public Random getRand() {

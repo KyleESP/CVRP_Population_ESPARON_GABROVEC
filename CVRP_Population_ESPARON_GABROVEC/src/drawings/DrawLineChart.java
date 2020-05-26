@@ -16,12 +16,9 @@ import cvrp_population.Util;
 
 public class DrawLineChart extends JPanel {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	private final int WIDTH = 1400;
-    private final int HEIGHT = 1000;
+	private final int WIDTH = 900;
+    private final int HEIGHT = 650;
     private static final Stroke GRAPH_STROKE = new BasicStroke(2f);
     private int padding = 25;
     private int labelPadding = 25;
