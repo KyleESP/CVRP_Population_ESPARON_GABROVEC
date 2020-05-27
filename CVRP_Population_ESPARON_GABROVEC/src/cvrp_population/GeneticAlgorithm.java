@@ -68,9 +68,9 @@ public class GeneticAlgorithm {
 	
 	private ArrayList<Vehicle> getRandomButNotBest() {
 		ArrayList<ArrayList<Vehicle>> notBests = new ArrayList<>();
-		for (ArrayList<Vehicle> vehicles : population) {
-			if (objectiveFunction(vehicles) != bestCost) {
-				notBests.add(vehicles);
+		for (ArrayList<Vehicle> individual : population) {
+			if (objectiveFunction(individual) != bestCost) {
+				notBests.add(individual);
 			}
 		}
 		ArrayList<Vehicle> randomIndividual = null;
@@ -168,30 +168,30 @@ public class GeneticAlgorithm {
 	
 	public void displayDescription() {
 		System.out.println("----------------------------------------------------------------------------------------------------");
-		System.out.println("Algorithme génétique :");
-		String description = "Coût initial = " + (double) Math.round(bestCost * 1000) / 1000;
-		description += "\nNombre de générations = " + nbGenerations;
+		System.out.println("Algorithme gï¿½nï¿½tique :");
+		String description = "Coï¿½t initial = " + (double) Math.round(bestCost * 1000) / 1000;
+		description += "\nNombre de gï¿½nï¿½rations = " + nbGenerations;
 		description += "\nNombre d'individus = " + nbIndividuals;
-		description += "\nProbabilité de mutation = " + pMutation;
+		description += "\nProbabilitï¿½ de mutation = " + pMutation;
 		System.out.println(description);
 		System.out.println("----------------------------------------------------------------------------------------------------");
 	}
 	
 	public String getInlineDescription() {
-		String description = "Coût final = " + (double) Math.round(bestCost * 1000) / 1000;
-		description += " | Nb véhicules = " + bestIndividual.size() + " | ";
+		String description = "Coï¿½t final = " + (double) Math.round(bestCost * 1000) / 1000;
+		description += " | Nb vï¿½hicules = " + bestIndividual.size() + " | ";
 		description += " | Nombre d'individus = " +  nbIndividuals;
-		description += " | Nombre de générations = " + nbGenerations;
-		description += " | Probabilité de mutation = " + pMutation;
+		description += " | Nombre de gï¿½nï¿½rations = " + nbGenerations;
+		description += " | Probabilitï¿½ de mutation = " + pMutation;
 		return description;
 	}
 	
     public void displayIndividual(ArrayList<Vehicle> vehicles) {
     	System.out.println("----------------------------------------------------------------------------------------------------");
         for (int i = 0 ; i < vehicles.size() ; i++) {
-            System.out.println("Véhicule n°" + (i + 1) + " : " + getRouteString(vehicles.get(i).getRoute()));
+            System.out.println("Vï¿½hicule nï¿½" + (i + 1) + " : " + getRouteString(vehicles.get(i).getRoute()));
         }
-        System.out.println("\nCoût de la solution : " + objectiveFunction(vehicles));
+        System.out.println("\nCoï¿½t de la solution : " + objectiveFunction(vehicles));
     	System.out.println("----------------------------------------------------------------------------------------------------");
     }
     

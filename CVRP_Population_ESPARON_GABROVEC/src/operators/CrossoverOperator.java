@@ -64,8 +64,9 @@ public class CrossoverOperator {
 		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
 		
 		ArrayList<Integer> child = new ArrayList<>();
-		child.add(p1Locations.get(0).getId());
-		int lastLocId = p1Locations.get(1).getId();
+		int randStart = gen.getRand().nextInt(p1Locations.size() - 1);
+		child.add(p1Locations.get(randStart).getId());
+		int lastLocId = p1Locations.get(randStart + 1).getId();
 		child.add(lastLocId);
 		
 		while (child.size() < p1Locations.size()) {
