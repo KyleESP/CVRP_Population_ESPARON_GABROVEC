@@ -10,6 +10,8 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.util.ArrayList;
+import java.util.TreeMap;
+
 import javax.swing.JPanel;
 
 import cvrp_population.Util;
@@ -28,9 +30,9 @@ public class DrawLineChart extends JPanel {
     private Color bgColor = Color.WHITE;
     private int pointWidth = 4;
     private int numberYDivisions = 10;
-    private ArrayList<Object[]> scores;
+    private TreeMap<Integer, Double> scores;
 
-    public DrawLineChart(ArrayList<Object[]> scores) {
+    public DrawLineChart(TreeMap<Integer, Double> scores) {
         this.scores = scores;
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
     }
@@ -42,33 +44,35 @@ public class DrawLineChart extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
         int scoresSize = scores.size();
+        
         double maxScore = Double.NEGATIVE_INFINITY;
         double minScore = Double.POSITIVE_INFINITY;
-        double currScore;
-        for (int i = 0; i < scores.size(); i++) {
-        	currScore = (double)scores.get(i)[1];
-        	if (currScore < minScore) {
-        		minScore = currScore;
+        for (Double val : scores.values()) {
+        	if (val < minScore) {
+        		minScore = val;
         	}
-        	if (currScore > maxScore) {
-        		maxScore = currScore;
+        	if (val > maxScore) {
+        		maxScore = val;
         	}
         }
+        
         double xScale = ((double)getWidth() - (2 * padding) - labelPadding) / (scoresSize - 1);
         double yScale = ((double)getHeight() - 2 * padding - labelPadding) / (maxScore - minScore);
         
         ArrayList<Point> graphPoints = new ArrayList<>();
-        for (int i = 0; i < scoresSize; i++) {
+        int i = 0;
+        for (Double val : scores.values()) {
             int x1 = (int)(i * xScale + padding + labelPadding);
-            int y1 = (int)((maxScore - (double)scores.get(i)[1]) * yScale + padding);
+            int y1 = (int)((maxScore - val) * yScale + padding);
             graphPoints.add(new Point(x1, y1));
+            i++;
         }
 
         g2d.setColor(bgColor);
         g2d.fillRect(0, 0, WIDTH, HEIGHT);
         g2d.setColor(Color.BLACK);
 
-        for (int i = 0; i < numberYDivisions + 1; i++) {
+        for (i = 0; i < numberYDivisions + 1; i++) {
             int x0 = padding + labelPadding;
             int x1 = pointWidth + padding + labelPadding;
             int y0 = getHeight() - ((i * (getHeight() - padding * 2 - labelPadding)) / numberYDivisions + padding + labelPadding);
@@ -84,9 +88,9 @@ public class DrawLineChart extends JPanel {
             }
             g2d.drawLine(x0, y0, x1, y1);
         }
-
-        for (int i = 0; i < scoresSize; i++) {
-        	int iter = (int)scores.get(i)[0];
+        
+        i = 0;
+        for (Integer key : scores.keySet()) {
             int x0 = i * (getWidth() - padding * 2 - labelPadding) / (scoresSize - 1) + padding + labelPadding;
             int x1 = x0;
             int y0 = getHeight() - padding - labelPadding;
@@ -94,11 +98,12 @@ public class DrawLineChart extends JPanel {
             g2d.setColor(gridColor);
             g2d.drawLine(x0, getHeight() - padding - labelPadding - 1 - pointWidth, x1, padding);
             g2d.setColor(Color.BLACK);
-            String xLabel = Util.formatInt(iter);
+            String xLabel = Util.formatInt(key);
             FontMetrics metrics = g2d.getFontMetrics();
             int labelWidth = metrics.stringWidth(xLabel);
             g2d.drawString(xLabel, x0 - labelWidth / 2, y0 + metrics.getHeight() + 3);
             g2d.drawLine(x0, y0, x1, y1);
+            i++;
         }
 
         g2d.drawLine(padding + labelPadding, getHeight() - padding - labelPadding, padding + labelPadding, padding);
@@ -107,7 +112,7 @@ public class DrawLineChart extends JPanel {
         Stroke oldStroke = g2d.getStroke();
         g2d.setColor(lineColor);
         g2d.setStroke(GRAPH_STROKE);
-        for (int i = 0; i < graphPoints.size() - 1; i++) {
+        for (i = 0; i < graphPoints.size() - 1; i++) {
             int x1 = graphPoints.get(i).x;
             int y1 = graphPoints.get(i).y;
             int x2 = graphPoints.get(i + 1).x;

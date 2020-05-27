@@ -3,6 +3,7 @@ package cvrp_population;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import java.util.TreeMap;
 
 import operators.CrossoverOperator;
 import operators.MutationOperator;
@@ -22,7 +23,7 @@ public class GeneticAlgorithm {
 	private ArrayList<ArrayList<Vehicle>> population;
     private ArrayList<Vehicle> bestIndividual;
     private double bestCost;
-    private ArrayList<Object[]> bestCostsHistory;
+    private TreeMap<Integer, Double> bestCostsHistory;
 	private Random rand;
 	
 	public GeneticAlgorithm(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation, double diffRate) {
@@ -37,28 +38,30 @@ public class GeneticAlgorithm {
     	selectionOperator = new SelectionOperator(this);
     	mutationOperator = new MutationOperator(this);
     	crossoverOperator = new CrossoverOperator(this);
-    	bestCostsHistory = new ArrayList<>();
-		initPopulation();
+    	bestCostsHistory = new TreeMap<>();
 	}
 	
     public void exec() {
-		bestCost = Double.POSITIVE_INFINITY;
-		updateBestIndividual(0);
+    	initPopulation();
 		displayDescription();
 		int percentage = -1, newPercentage;
 		ArrayList<Vehicle> parent1, parent2, child;
 		ArrayList<Vehicle> parentMutation, mutant;
-		for (int i = 0; i < nbGenerations; i++) {
+		for (int i = 1; i <= nbGenerations; i++) {
 			parent1 = selectionOperator.tournament(3);
 			parent2 = selectionOperator.tournament(3);
 			child = crossoverOperator.hGreXCrossover(parent1, parent2);
 			setSimilarIndividual(child);
+			updateBestIndividual(child, i);
 			if (rand.nextDouble() < pMutation && (parentMutation = getRandomButNotBest()) != null) {
 				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(parentMutation) : mutationOperator.displacementMutation(parentMutation);
 				population.remove(parentMutation);
 				population.add(mutant);
+				updateBestIndividual(mutant, i);
 			}
-			updateBestIndividual(i + 1);
+			if (i == nbGenerations) {
+				bestCostsHistory.put(i, bestCost);
+			}
 			if ((newPercentage = (int)(((double)(i + 1) / nbGenerations) * 100)) != percentage) {
 				percentage = newPercentage;
 				System.out.println(percentage + "%");
@@ -97,8 +100,7 @@ public class GeneticAlgorithm {
 			}
 		}
 		if (!hasSimilar) {
-			ArrayList<Vehicle> badIndividual = selectionOperator.tournament(2);
-			population.remove(badIndividual);
+			population.remove(getRandomButNotBest());
 			population.add(individual);
 		}
 	}
@@ -108,29 +110,30 @@ public class GeneticAlgorithm {
 	}
 	
 	private void initPopulation() {
+		double minCost = Double.POSITIVE_INFINITY, currCost;
+		ArrayList<Vehicle> minInd = null;
 		ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
 		locationsCopy.remove(Util.getLocationById(0, locationsCopy));
 		for (int i = 0; i < nbIndividuals; i++) {
 	        Collections.shuffle(locationsCopy);
-	        population.add(reconstruct(locationsCopy));
+	        ArrayList<Vehicle> individual = reconstruct(locationsCopy);
+	        population.add(individual);
+	        if ((currCost = objectiveFunction(individual)) < minCost) {
+	        	minCost = currCost;
+	        	minInd = individual;
+	        }
 		}
+		bestCost = minCost;
+		bestIndividual = minInd;
+		bestCostsHistory.put(0, bestCost);
     }
 	
-	private void updateBestIndividual(int i) {
-		double fMin = Double.POSITIVE_INFINITY, fCurr;
-		ArrayList<Vehicle> xMin = null;
-		for (ArrayList<Vehicle> vehicles : population) {
-			if ((fCurr = objectiveFunction(vehicles)) < fMin) {
-				fMin = fCurr;
-				xMin = vehicles;
-			}
-		}
-		if (fMin < bestCost) {
-			bestCost = fMin;
-			bestIndividual = xMin;
-			bestCostsHistory.add(new Object[] {i, bestCost});
-		} else if (i == nbGenerations) {
-			bestCostsHistory.add(new Object[] {i, bestCost});
+	private void updateBestIndividual(ArrayList<Vehicle> individual, int i) {
+		double indCost;
+		if ((indCost = objectiveFunction(individual)) < bestCost) {
+			bestCost = indCost;
+			bestIndividual = individual;
+			bestCostsHistory.put(i, bestCost);
 		}
 	}
 	
@@ -217,7 +220,7 @@ public class GeneticAlgorithm {
     	return bestCost;
     }
     
-    public ArrayList<Object[]> getBestCostsHistory() {
+    public TreeMap<Integer, Double> getBestCostsHistory() {
     	return bestCostsHistory;
     }
     

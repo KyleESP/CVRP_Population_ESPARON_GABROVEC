@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -115,7 +116,7 @@ public abstract class Util {
         frame.setVisible(true);
 	}
 	
-	public static void drawLineChart(String title, String parametersDesc, String desc, ArrayList<Object[]> bestCostsHistory) {
+	public static void drawLineChart(String title, String parametersDesc, String desc, TreeMap<Integer, Double> bestCostsHistory) {
 		JFrame frame = new JFrame(title);
 		JPanel mainPanel = new JPanel();
 		mainPanel.setBackground(Color.WHITE);

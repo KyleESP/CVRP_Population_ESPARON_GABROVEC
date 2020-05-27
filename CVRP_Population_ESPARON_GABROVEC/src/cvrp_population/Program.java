@@ -8,9 +8,9 @@ public class Program {
 	
 	private static final int MAX_VEHICLES_CAPACITY = 100;
 	
-	private static final long NB_GENERATIONS = 1000000;
+	private static final long NB_GENERATIONS = 100000;
 	private static final int NB_INDIVIDUALS = 30;
-	private static final double P_MUTATION = 0.2;
+	private static final double P_MUTATION = 0.01;
 	private static final double DIFF_RATE = 0.01;
 	
 	/*private static final long NB_GENERATIONS_2 = 30000;
@@ -19,7 +19,7 @@ public class Program {
 	private static final double P_MUTATION_2 = 0.01;*/
 	
 	public static void main(String[] args) {
-	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE);
+ 	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE);
 	    
 	    GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_MUTATION, DIFF_RATE);
         ga.exec();
