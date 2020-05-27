@@ -61,12 +61,12 @@ public class SelectionOperator {
 		return probasRep;
 	}
 	
-	private ArrayList<Vehicle> getWinner(ArrayList<double[]> rouletteWheel, ArrayList<ArrayList<Vehicle>> participants) {
+	private ArrayList<Vehicle> getWinner(ArrayList<double[]> probasRepartition, ArrayList<ArrayList<Vehicle>> participants) {
 		double[] interval;
 		ArrayList<Vehicle> winner = null;
 		double p = gen.getRand().nextDouble();
-		for (int j = 0; j < rouletteWheel.size(); j++) {
-			interval = rouletteWheel.get(j);
+		for (int j = 0; j < probasRepartition.size(); j++) {
+			interval = probasRepartition.get(j);
 			if (p >= interval[0] && p < interval[1]) {
 				winner = participants.get(j);
 				break;
