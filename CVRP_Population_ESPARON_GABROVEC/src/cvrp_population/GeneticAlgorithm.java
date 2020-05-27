@@ -52,8 +52,10 @@ public class GeneticAlgorithm {
 			parent2 = selectionOperator.tournament(3);
 			child = crossoverOperator.hGreXCrossover(parent1, parent2);
 			setSimilarIndividual(child, i);
-			if (rand.nextDouble() < pMutation && (parentMutation = getRandomButNotBest()) != null) {
-				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(parentMutation) : mutationOperator.displacementMutation(parentMutation);
+			if (rand.nextDouble() < pMutation) {
+				parentMutation = getRandomButNotBest();
+				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(parentMutation) 
+						: mutationOperator.displacementMutation(parentMutation);
 				population.remove(parentMutation);
 				population.add(mutant);
 				updateBestIndividual(mutant, objectiveFunction(mutant), i);
@@ -67,17 +69,13 @@ public class GeneticAlgorithm {
     }
 	
 	private ArrayList<Vehicle> getRandomButNotBest() {
-		ArrayList<ArrayList<Vehicle>> notBests = new ArrayList<>();
+		ArrayList<ArrayList<Vehicle>> notBest = new ArrayList<>();
 		for (ArrayList<Vehicle> individual : population) {
 			if (objectiveFunction(individual) != bestCost) {
-				notBests.add(individual);
+				notBest.add(individual);
 			}
 		}
-		ArrayList<Vehicle> randomIndividual = null;
-		if (!notBests.isEmpty()) {
-			randomIndividual = notBests.get(rand.nextInt(notBests.size()));
-		}
-		return randomIndividual;
+		return !notBest.isEmpty() ? notBest.get(rand.nextInt(notBest.size())) : population.get(0);
 	}
 	
 	private void setSimilarIndividual(ArrayList<Vehicle> individual, int i) {
