@@ -80,6 +80,7 @@ public class GeneticAlgorithm {
 	
 	private void setSimilarIndividual(ArrayList<Vehicle> individual, int i) {
 		double indCost = objectiveFunction(individual), currIndCost;
+		ArrayList<Vehicle> worst;
 		boolean hasSimilar = false;
 		if (areSimilar(bestCost, indCost, diffRate)) {
 			for (ArrayList<Vehicle> currInd : population) {
@@ -88,16 +89,27 @@ public class GeneticAlgorithm {
 					if (indCost < currIndCost) {
 						population.remove(currInd);
 						population.add(individual);
+						updateBestIndividual(individual, indCost, i);
 						break;
 					}
 				}
 			}
 		}
-		if (!hasSimilar) {
-			population.remove(getRandomButNotBest());
+		if (!hasSimilar && (worst = getWorst(indCost)) != null) {
+			population.remove(worst);
 			population.add(individual);
+			updateBestIndividual(individual, indCost, i);
 		}
-		updateBestIndividual(individual, indCost, i);
+	}
+	
+	private ArrayList<Vehicle> getWorst(double cost) {
+		ArrayList<ArrayList<Vehicle>> worst = new ArrayList<>();
+		for (ArrayList<Vehicle> individual : population) {
+			if (cost < objectiveFunction(individual)) {
+				worst.add(individual);
+			}
+		}
+		return !worst.isEmpty() ? worst.get(rand.nextInt(worst.size())) : null;
 	}
 	
 	private boolean areSimilar(double a, double b, double perc) {
