@@ -103,7 +103,7 @@ public class GeneticAlgorithm {
 		}
 	}
 	
-	public boolean areSimilar(double a, double b, double perc) {
+	private boolean areSimilar(double a, double b, double perc) {
 		return Math.abs(a - b) / Math.min(a, b) <= perc;
 	}
 	
