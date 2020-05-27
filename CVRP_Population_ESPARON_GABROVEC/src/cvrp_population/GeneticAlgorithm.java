@@ -168,30 +168,30 @@ public class GeneticAlgorithm {
 	
 	public void displayDescription() {
 		System.out.println("----------------------------------------------------------------------------------------------------");
-		System.out.println("Algorithme gï¿½nï¿½tique :");
-		String description = "Coï¿½t initial = " + (double) Math.round(bestCost * 1000) / 1000;
-		description += "\nNombre de gï¿½nï¿½rations = " + nbGenerations;
+		System.out.println("Algorithme génétique :");
+		String description = "Coût initial = " + (double) Math.round(bestCost * 1000) / 1000;
+		description += "\nNombre de générations = " + nbGenerations;
 		description += "\nNombre d'individus = " + nbIndividuals;
-		description += "\nProbabilitï¿½ de mutation = " + pMutation;
+		description += "\nProbabilité de mutation = " + pMutation;
 		System.out.println(description);
 		System.out.println("----------------------------------------------------------------------------------------------------");
 	}
 	
 	public String getInlineDescription() {
-		String description = "Coï¿½t final = " + (double) Math.round(bestCost * 1000) / 1000;
-		description += " | Nb vï¿½hicules = " + bestIndividual.size() + " | ";
+		String description = "Coût final = " + (double) Math.round(bestCost * 1000) / 1000;
+		description += " | Nb véhicules = " + bestIndividual.size() + " | ";
 		description += " | Nombre d'individus = " +  nbIndividuals;
-		description += " | Nombre de gï¿½nï¿½rations = " + nbGenerations;
-		description += " | Probabilitï¿½ de mutation = " + pMutation;
+		description += " | Nombre de générations = " + nbGenerations;
+		description += " | Probabilité de mutation = " + pMutation;
 		return description;
 	}
 	
     public void displayIndividual(ArrayList<Vehicle> vehicles) {
     	System.out.println("----------------------------------------------------------------------------------------------------");
         for (int i = 0 ; i < vehicles.size() ; i++) {
-            System.out.println("Vï¿½hicule nï¿½" + (i + 1) + " : " + getRouteString(vehicles.get(i).getRoute()));
+            System.out.println("Véhicule n°" + (i + 1) + " : " + getRouteString(vehicles.get(i).getRoute()));
         }
-        System.out.println("\nCoï¿½t de la solution : " + objectiveFunction(vehicles));
+        System.out.println("\nCoût de la solution : " + objectiveFunction(vehicles));
     	System.out.println("----------------------------------------------------------------------------------------------------");
     }
     
