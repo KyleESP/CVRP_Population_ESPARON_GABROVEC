@@ -17,6 +17,7 @@ public class GeneticAlgorithm {
 	private int nbIndividuals;
 	private double pMutation;
 	private int maxCapacity;
+	private double diffRate;
 	private ArrayList<Location> locations;
 	private ArrayList<ArrayList<Vehicle>> population;
     private ArrayList<Vehicle> bestIndividual;
@@ -24,11 +25,12 @@ public class GeneticAlgorithm {
     private ArrayList<Object[]> bestCostsHistory;
 	private Random rand;
 	
-	public GeneticAlgorithm(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation) {
+	public GeneticAlgorithm(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation, double diffRate) {
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
     	this.pMutation = pMutation;
+    	this.diffRate = diffRate;
     	population = new ArrayList<>(nbIndividuals);
     	this.locations = locations;
     	rand = new Random();
@@ -81,17 +83,17 @@ public class GeneticAlgorithm {
 	
 	private void setSimilarIndividual(ArrayList<Vehicle> individual) {
 		double indCost = objectiveFunction(individual), currIndCost;
-		boolean indCostBetter, hasSimilar = false;
-		for (ArrayList<Vehicle> currInd : population) {
-			currIndCost = objectiveFunction(currInd);
-			indCostBetter = currIndCost < indCost;
-			if (Math.abs(currIndCost - indCost) / (indCostBetter ? currIndCost : indCost) < 0.01) {
-				if (indCostBetter) {
-					population.remove(currInd);
-					population.add(individual);
+		boolean hasSimilar = false;
+		if (areSimilar(bestCost, indCost, diffRate)) {
+			for (ArrayList<Vehicle> currInd : population) {
+				if (areSimilar(bestCost, (currIndCost = objectiveFunction(currInd)), diffRate)) {
+					hasSimilar = true;
+					if (indCost < currIndCost) {
+						population.remove(currInd);
+						population.add(individual);
+						break;
+					}
 				}
-				hasSimilar = true;
-				break;
 			}
 		}
 		if (!hasSimilar) {
@@ -99,6 +101,10 @@ public class GeneticAlgorithm {
 			population.remove(badIndividual);
 			population.add(individual);
 		}
+	}
+	
+	public boolean areSimilar(double a, double b, double perc) {
+		return Math.abs(a - b) / Math.min(a, b) <= perc;
 	}
 	
 	private void initPopulation() {
