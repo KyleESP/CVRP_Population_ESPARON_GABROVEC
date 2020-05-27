@@ -15,15 +15,12 @@ public class SelectionOperator {
 	}
 	
 	public ArrayList<Vehicle> tournament(int nbParticipants) {
-		ArrayList<ArrayList<Vehicle>> population = gen.getPopulation();
-		int populationSize = population.size();
 		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants);
-		double totalCost = 0;
 		ArrayList<Vehicle> participant;
 		ArrayList<Double> costs = new ArrayList<>();
-		double cost;
+		double totalCost = 0, cost;
 		for (int i = 0; i < nbParticipants; i++) {
-			participant = population.get(gen.getRand().nextInt(populationSize));
+			participant = gen.getPopulation().get(gen.getRand().nextInt(gen.getPopulation().size()));
 			participants.add(participant);
 			cost = gen.objectiveFunction(participant);
 			costs.add(cost);
