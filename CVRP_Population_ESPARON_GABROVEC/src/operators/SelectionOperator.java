@@ -29,8 +29,8 @@ public class SelectionOperator {
 			costs.add(cost);
 			totalCost += cost;
 		}
-		ArrayList<double[]> probasMass = getProbasRepartition(costs, totalCost);
-		ArrayList<Vehicle> winner = getWinner(probasMass, participants);
+		boolean allEqual = costs.stream().allMatch(costs.get(0)::equals);
+		ArrayList<Vehicle> winner = allEqual ? participants.get(0) : getWinner(getProbasRepartition(costs, totalCost), participants);
 		return winner;
 	}
 	
