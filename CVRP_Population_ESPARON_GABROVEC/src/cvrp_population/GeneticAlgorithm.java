@@ -66,26 +66,16 @@ public class GeneticAlgorithm {
     }
 	
 	private ArrayList<Vehicle> getRandomButNotBest() {
-		ArrayList<Double> costs = new ArrayList<>();
-		double fMin = Double.POSITIVE_INFINITY, fCurr;
-		for (ArrayList<Vehicle> vehicles : population) {
-			fCurr = objectiveFunction(vehicles);
-			costs.add(fCurr);
-			if (fCurr < fMin) {
-				fMin = fCurr;
-			}
-		}
 		ArrayList<ArrayList<Vehicle>> notBests = new ArrayList<>();
-		for (int i = 0; i < population.size(); i++) {
-			if (costs.get(i) != fMin) {
-				notBests.add(population.get(i));
+		for (ArrayList<Vehicle> vehicles : population) {
+			if (objectiveFunction(vehicles) != bestCost) {
+				notBests.add(vehicles);
 			}
 		}
 		ArrayList<Vehicle> randomIndividual = null;
 		if (!notBests.isEmpty()) {
 			randomIndividual = notBests.get(rand.nextInt(notBests.size()));
 		}
-		
 		return randomIndividual;
 	}
 	
