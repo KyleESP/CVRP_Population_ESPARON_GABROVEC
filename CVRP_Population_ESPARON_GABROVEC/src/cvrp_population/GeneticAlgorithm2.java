@@ -83,48 +83,12 @@ public class GeneticAlgorithm2 {
 	}
 	
     private void initPopulation() {
+		ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
+		locationsCopy.remove(Util.getLocationById(0, locationsCopy));
 		for (int i = 0; i < nbIndividuals; i++) {
-			ArrayList<Vehicle> vehicles = new ArrayList<>();
-			population.add(vehicles);
-	        int vIdx = 0;
-	        Vehicle v;
-	        ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
-	        Location depot = Util.getLocationById(0, locationsCopy);
 	        Collections.shuffle(locationsCopy);
-	        while (hasAnUnroutedLocation(locationsCopy)) {
-	        	if (vIdx >= vehicles.size()) {
-	        		Vehicle newV = new Vehicle(maxCapacity);
-	        		newV.routeLocation(depot);
-	        		vehicles.add(vIdx, newV);
-	        	}
-	        	v = vehicles.get(vIdx);
-	            Location choseLocation = null;
-	            int currentLocationId = v.getCurrentLocationId();
-	            for(Location l : locationsCopy) {
-	            	if((currentLocationId != l.getId()) && !l.getIsRouted() && v.fits(l.getNbOrders())) {
-	                    choseLocation = l;
-	            	}
-	            }
-	            if(choseLocation != null) {
-	            	v.routeLocation(choseLocation);
-	            } else {
-	                v.routeLocation(depot);
-	                vIdx++;
-	            }
-	        }
-	        vehicles.get(vIdx).routeLocation(depot);
+	        population.add(reconstruct(locationsCopy));
 		}
-    }
-    
-	private boolean hasAnUnroutedLocation(ArrayList<Location> locations) {
-		boolean hasUnroutedLocation = false;
-        for(Location l : locations) {
-            if (!l.getIsRouted()) {
-            	hasUnroutedLocation = true;
-            	break;
-            }
-        }
-        return hasUnroutedLocation;
     }
 	
 	private void updateBestIndividual(int i) {
