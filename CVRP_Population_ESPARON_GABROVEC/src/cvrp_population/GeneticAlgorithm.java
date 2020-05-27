@@ -51,16 +51,12 @@ public class GeneticAlgorithm {
 			parent1 = selectionOperator.tournament(3);
 			parent2 = selectionOperator.tournament(3);
 			child = crossoverOperator.hGreXCrossover(parent1, parent2);
-			setSimilarIndividual(child);
-			updateBestIndividual(child, i);
+			setSimilarIndividual(child, i);
 			if (rand.nextDouble() < pMutation && (parentMutation = getRandomButNotBest()) != null) {
 				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(parentMutation) : mutationOperator.displacementMutation(parentMutation);
 				population.remove(parentMutation);
 				population.add(mutant);
-				updateBestIndividual(mutant, i);
-			}
-			if (i == nbGenerations) {
-				bestCostsHistory.put(i, bestCost);
+				updateBestIndividual(mutant, objectiveFunction(mutant), i);
 			}
 			if ((newPercentage = (int)(((double)(i + 1) / nbGenerations) * 100)) != percentage) {
 				percentage = newPercentage;
@@ -84,7 +80,7 @@ public class GeneticAlgorithm {
 		return randomIndividual;
 	}
 	
-	private void setSimilarIndividual(ArrayList<Vehicle> individual) {
+	private void setSimilarIndividual(ArrayList<Vehicle> individual, int i) {
 		double indCost = objectiveFunction(individual), currIndCost;
 		boolean hasSimilar = false;
 		if (areSimilar(bestCost, indCost, diffRate)) {
@@ -103,6 +99,7 @@ public class GeneticAlgorithm {
 			population.remove(getRandomButNotBest());
 			population.add(individual);
 		}
+		updateBestIndividual(individual, indCost, i);
 	}
 	
 	private boolean areSimilar(double a, double b, double perc) {
@@ -128,10 +125,9 @@ public class GeneticAlgorithm {
 		bestCostsHistory.put(0, bestCost);
     }
 	
-	private void updateBestIndividual(ArrayList<Vehicle> individual, int i) {
-		double indCost;
-		if ((indCost = objectiveFunction(individual)) < bestCost) {
-			bestCost = indCost;
+	private void updateBestIndividual(ArrayList<Vehicle> individual, double cost, int i) {
+		if (cost < bestCost) {
+			bestCost = cost;
 			bestIndividual = individual;
 			bestCostsHistory.put(i, bestCost);
 		}
