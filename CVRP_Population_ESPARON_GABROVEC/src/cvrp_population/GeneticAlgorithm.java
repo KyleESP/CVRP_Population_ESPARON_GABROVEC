@@ -8,12 +8,14 @@ import java.util.TreeMap;
 import operators.CrossoverOperator;
 import operators.MutationOperator;
 import operators.SelectionOperator;
+import operators.TransformationOperator;
 
 public class GeneticAlgorithm {
-	
+
 	private CrossoverOperator crossoverOperator;
 	private MutationOperator mutationOperator;
 	private SelectionOperator selectionOperator;
+	private TransformationOperator transformationOperator;
 	private long nbGenerations;
 	private int nbIndividuals;
 	private double pMutation;
@@ -38,6 +40,7 @@ public class GeneticAlgorithm {
     	selectionOperator = new SelectionOperator(this);
     	mutationOperator = new MutationOperator(this);
     	crossoverOperator = new CrossoverOperator(this);
+    	transformationOperator = new TransformationOperator(this);
     	bestCostsHistory = new TreeMap<>();
 	}
 	
@@ -163,8 +166,8 @@ public class GeneticAlgorithm {
 				}
 				for (int locFromIdx = 1; locFromIdx < routeFromSize - (isSameRoute ? 2 : 1); locFromIdx++) {
 					for (int locToIdx = (isSameRoute ? (locFromIdx + 1) : (locFromIdx == routeFromSize - 2 ? 1 : 0)); locToIdx < routeToSize - ((isSameRoute && locFromIdx == 1 || !isSameRoute && locFromIdx == routeFromSize - 2) ? 2 : 1); locToIdx++) {
-						if ((newInd = isSameRoute ? swapTwoOpt(individual, vFromIdx, locFromIdx, locToIdx) 
-								: swapRoutes(individual, routeFrom, routeTo, vFromIdx, vToIdx, locFromIdx, locToIdx)) != null 
+						if ((newInd = isSameRoute ? transformationOperator.swapTwoOpt(individual, vFromIdx, locFromIdx, locToIdx) 
+								: transformationOperator.swapRoutes(individual, routeFrom, routeTo, vFromIdx, vToIdx, locFromIdx, locToIdx)) != null 
 								&& (currCost = objectiveFunction(newInd)) < minCost) {
 							minCost = currCost;
 							bestInd = newInd;
@@ -175,54 +178,6 @@ public class GeneticAlgorithm {
 		}
 		return bestInd;
 	}
-    
-	private ArrayList<Vehicle> swapRoutes(ArrayList<Vehicle> individual, ArrayList<Location> routeFrom, ArrayList<Location> routeTo, int vFromIdx, int vToIdx, int locFromIdx, int locToIdx) {
-		Vehicle newVFrom = new Vehicle(maxCapacity);
-		Vehicle newVTo = new Vehicle(maxCapacity);
-		int i;
-        for (i = 0; i <= locFromIdx; i++) {
-        	newVFrom.routeLocation(routeFrom.get(i));
-        }
-        for (i = locToIdx + 1; i < routeTo.size(); i++) {
-        	if (!newVFrom.routeLocation(routeTo.get(i))) {
-        		return null;
-        	}
-        }
-        
-        for (i = 0; i <= locToIdx; i++) {
-        	newVTo.routeLocation(routeTo.get(i));
-        }
-        for (i = locFromIdx + 1; i < routeFrom.size(); i++) {
-        	if (!newVTo.routeLocation(routeFrom.get(i))) {
-        		return null;
-        	}
-        }
-        ArrayList<Vehicle> newVehicles = Util.createDeepCopyVehicles(individual);
-        newVehicles.set(vFromIdx, newVFrom);
-        newVehicles.set(vToIdx, newVTo);
-		return newVehicles;
-    }
-	
-	private ArrayList<Vehicle> swapTwoOpt(ArrayList<Vehicle> individual, int vIdx, int locFromIdx, int locToIdx) {
-		Vehicle newV = new Vehicle(maxCapacity);
-		ArrayList<Location> route = individual.get(vIdx).getRoute();
-		
-		int i;
-        for (i = 0; i <= locFromIdx - 1; i++) {
-            newV.routeLocation(route.get(i));
-        }
-        int dcr = 0;
-        for (i = locFromIdx; i <= locToIdx; i++) {
-            newV.routeLocation(route.get(locToIdx - dcr));
-            dcr++;
-        }
-        for (i = locToIdx + 1; i < route.size(); i++) {
-        	newV.routeLocation(route.get(i));
-        }
-        ArrayList<Vehicle> newVehicles = Util.createDeepCopyVehicles(individual);
-        newVehicles.set(vIdx, newV);
-        return newVehicles;
-    }
 	
 	private void updateBestIndividual(ArrayList<Vehicle> individual, double cost, int i) {
 		if (cost < bestCost) {
@@ -311,6 +266,10 @@ public class GeneticAlgorithm {
     
     public ArrayList<Vehicle> getBestIndividual() {
     	return bestIndividual;
+    }
+    
+    public int getMaxCapacity() {
+    	return maxCapacity;
     }
     
     public TreeMap<Integer, Double> getBestCostsHistory() {
