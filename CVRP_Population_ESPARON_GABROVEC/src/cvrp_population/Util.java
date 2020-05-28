@@ -138,6 +138,14 @@ public abstract class Util {
 		}
         return copy;
     }
+	
+	public static ArrayList<Vehicle> createDeepCopyVehicles(ArrayList<Vehicle> source) {
+    	ArrayList<Vehicle> copy = new ArrayList<>();
+        for (Vehicle v : source) {
+        	copy.add(new Vehicle(v));
+        }
+        return copy;
+    }
 
 	public static String formatInt(int number) {
 		char[] suffixes = {'k', 'm', 'g', 't', 'p', 'e' };
