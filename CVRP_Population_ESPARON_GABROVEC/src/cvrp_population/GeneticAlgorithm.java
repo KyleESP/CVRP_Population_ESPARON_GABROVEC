@@ -51,11 +51,13 @@ public class GeneticAlgorithm {
 			parent1 = selectionOperator.tournament(3);
 			parent2 = selectionOperator.tournament(3);
 			child = crossoverOperator.hGreXCrossover(parent1, parent2);
+			child = descent(child);
 			setSimilarIndividual(child, i);
 			if (rand.nextDouble() < pMutation) {
 				parentMutation = getRandomButNotBest();
 				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(parentMutation) 
 						: mutationOperator.displacementMutation(parentMutation);
+				mutant = descent(mutant);
 				population.remove(parentMutation);
 				population.add(mutant);
 				updateBestIndividual(mutant, objectiveFunction(mutant), i);
