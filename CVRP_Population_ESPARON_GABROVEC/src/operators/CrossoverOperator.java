@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import cvrp_population.GeneticAlgorithm2;
 import cvrp_population.GeneticAlgorithm;
 import cvrp_population.Location;
 import cvrp_population.Util;

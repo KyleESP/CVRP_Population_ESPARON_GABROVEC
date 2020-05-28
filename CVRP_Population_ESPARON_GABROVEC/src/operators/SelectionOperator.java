@@ -2,7 +2,6 @@ package operators;
 
 import java.util.ArrayList;
 
-import cvrp_population.GeneticAlgorithm2;
 import cvrp_population.GeneticAlgorithm;
 import cvrp_population.Vehicle;
 
@@ -15,20 +14,18 @@ public class SelectionOperator {
 	}
 	
 	public ArrayList<Vehicle> tournament(int nbParticipants) {
-		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants);
+		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants), population = gen.getPopulation();
 		ArrayList<Vehicle> participant;
 		ArrayList<Double> costs = new ArrayList<>();
 		double totalCost = 0, cost;
 		for (int i = 0; i < nbParticipants; i++) {
-			participant = gen.getPopulation().get(gen.getRand().nextInt(gen.getPopulation().size()));
+			participant = population.get(gen.getRand().nextInt(population.size()));
 			participants.add(participant);
 			cost = gen.objectiveFunction(participant);
 			costs.add(cost);
 			totalCost += cost;
 		}
-		boolean allEqual = costs.stream().allMatch(costs.get(0)::equals);
-		ArrayList<Vehicle> winner = allEqual ? participants.get(0) : getWinner(getProbasRepartition(costs, totalCost), participants);
-		return winner;
+		return getWinner(getProbasRepartition(costs, totalCost), participants);
 	}
 	
 	public ArrayList<ArrayList<Vehicle>> rouletteWheel() {

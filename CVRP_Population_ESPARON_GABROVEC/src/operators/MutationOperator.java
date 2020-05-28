@@ -3,7 +3,6 @@ package operators;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import cvrp_population.GeneticAlgorithm2;
 import cvrp_population.GeneticAlgorithm;
 import cvrp_population.Location;
 import cvrp_population.Util;

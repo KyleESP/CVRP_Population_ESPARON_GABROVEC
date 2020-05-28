@@ -8,15 +8,10 @@ public class Program {
 	
 	private static final int MAX_VEHICLES_CAPACITY = 100;
 	
-	private static final long NB_GENERATIONS = 1000;
+	private static final long NB_GENERATIONS = 200;
 	private static final int NB_INDIVIDUALS = 10;
 	private static final double P_MUTATION = 0.01;
 	private static final double DIFF_RATE = 0.01;
-	
-	/*private static final long NB_GENERATIONS_2 = 30000;
-	private static final int NB_INDIVIDUALS_2 = 90;
-	private static final int NB_BEST_2 = 10;
-	private static final double P_MUTATION_2 = 0.01;*/
 	
 	public static void main(String[] args) {
  	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE);
