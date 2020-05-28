@@ -139,7 +139,7 @@ public abstract class Util {
         return copy;
     }
 	
-	public static ArrayList<Vehicle> createDeepCopyVehicles(ArrayList<Vehicle> source) {
+	public static ArrayList<Vehicle> createDeepCopyIndividual(ArrayList<Vehicle> source) {
     	ArrayList<Vehicle> copy = new ArrayList<>();
         for (Vehicle v : source) {
         	copy.add(new Vehicle(v));

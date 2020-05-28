@@ -21,6 +21,7 @@ public class GeneticAlgorithm {
 	private double pMutation;
 	private int maxCapacity;
 	private double diffRate;
+	private boolean descent;
 	private ArrayList<Location> locations;
 	private ArrayList<ArrayList<Vehicle>> population;
     private ArrayList<Vehicle> bestIndividual;
@@ -28,12 +29,13 @@ public class GeneticAlgorithm {
     private TreeMap<Integer, Double> bestCostsHistory;
 	private Random rand;
 	
-	public GeneticAlgorithm(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation, double diffRate) {
+	public GeneticAlgorithm(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, double pMutation, double diffRate, boolean descent) {
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
     	this.pMutation = pMutation;
     	this.diffRate = diffRate;
+    	this.descent = descent;
     	population = new ArrayList<>(nbIndividuals);
     	this.locations = locations;
     	rand = new Random();
@@ -54,13 +56,17 @@ public class GeneticAlgorithm {
 			parent1 = selectionOperator.tournament(3);
 			parent2 = selectionOperator.tournament(3);
 			child = crossoverOperator.hGreXCrossover(parent1, parent2);
-			child = descent(child);
+			if (descent) {
+				child = descent(child);
+			}
 			setSimilarIndividual(child, i);
 			if (rand.nextDouble() < pMutation) {
 				parentMutation = getRandomButNotBest();
 				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(parentMutation) 
 						: mutationOperator.displacementMutation(parentMutation);
-				mutant = descent(mutant);
+				if (descent) {
+					mutant = descent(mutant);
+				}
 				population.remove(parentMutation);
 				population.add(mutant);
 				updateBestIndividual(mutant, objectiveFunction(mutant), i);
@@ -228,6 +234,7 @@ public class GeneticAlgorithm {
 		description += "\nNombre d'individus = " + nbIndividuals;
 		description += "\nProbabilité de mutation = " + pMutation;
 		description += "\nTaux de différences = " + diffRate;
+		description += "\nMéthode de descente = " + (descent ? "Oui" : "Non");
 		System.out.println(description);
 		System.out.println("----------------------------------------------------------------------------------------------------");
 	}
@@ -235,10 +242,11 @@ public class GeneticAlgorithm {
 	public String getInlineDescription() {
 		String description = "Coût final = " + (double) Math.round(bestCost * 1000) / 1000;
 		description += " | Nb véhicules = " + bestIndividual.size() + " | ";
-		description += " | Nb individus = " +  nbIndividuals;
-		description += " | Nb generations = " + nbGenerations;
+		description += " | Nb idv = " +  nbIndividuals;
+		description += " | Nb gen = " + nbGenerations;
 		description += " | P(mutation) = " + pMutation;
-		description += " | Taux différences = " + diffRate;
+		description += " | Taux diff = " + diffRate;
+		description += " | Descente = " + (descent ? "Oui" : "Non");
 		return description;
 	}
 	

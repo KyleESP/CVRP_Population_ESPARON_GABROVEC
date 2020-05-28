@@ -36,10 +36,10 @@ public class TransformationOperator {
         		return null;
         	}
         }
-        ArrayList<Vehicle> newVehicles = Util.createDeepCopyVehicles(individual);
-        newVehicles.set(vFromIdx, newVFrom);
-        newVehicles.set(vToIdx, newVTo);
-		return newVehicles;
+        ArrayList<Vehicle> newIndividual = Util.createDeepCopyIndividual(individual);
+        newIndividual.set(vFromIdx, newVFrom);
+        newIndividual.set(vToIdx, newVTo);
+		return newIndividual;
     }
 	
 	public ArrayList<Vehicle> swapTwoOpt(ArrayList<Vehicle> individual, int vIdx, int locFromIdx, int locToIdx) {
@@ -58,8 +58,8 @@ public class TransformationOperator {
         for (i = locToIdx + 1; i < route.size(); i++) {
         	newV.routeLocation(route.get(i));
         }
-        ArrayList<Vehicle> newVehicles = Util.createDeepCopyVehicles(individual);
-        newVehicles.set(vIdx, newV);
-        return newVehicles;
+        ArrayList<Vehicle> newIndividual = Util.createDeepCopyIndividual(individual);
+        newIndividual.set(vIdx, newV);
+        return newIndividual;
     }
 }

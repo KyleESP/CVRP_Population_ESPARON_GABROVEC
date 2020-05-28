@@ -12,11 +12,12 @@ public class Program {
 	private static final int NB_INDIVIDUALS = 10;
 	private static final double P_MUTATION = 0.01;
 	private static final double DIFF_RATE = 0.01;
+	private static final boolean DESCENT = true;
 	
 	public static void main(String[] args) {
  	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE);
 	    
-	    GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_MUTATION, DIFF_RATE);
+	    GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, P_MUTATION, DIFF_RATE, DESCENT);
         ga.exec();
         
         String descGA = "Algorithme génétique (" + ga.getInlineDescription() + ")";
