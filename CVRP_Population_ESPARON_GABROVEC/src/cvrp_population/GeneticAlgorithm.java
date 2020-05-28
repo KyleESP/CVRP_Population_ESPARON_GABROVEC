@@ -185,6 +185,7 @@ public class GeneticAlgorithm {
 		description += "\nNombre de générations = " + nbGenerations;
 		description += "\nNombre d'individus = " + nbIndividuals;
 		description += "\nProbabilité de mutation = " + pMutation;
+		description += "\nTaux de différences = " + diffRate;
 		System.out.println(description);
 		System.out.println("----------------------------------------------------------------------------------------------------");
 	}
@@ -192,9 +193,10 @@ public class GeneticAlgorithm {
 	public String getInlineDescription() {
 		String description = "Coût final = " + (double) Math.round(bestCost * 1000) / 1000;
 		description += " | Nb véhicules = " + bestIndividual.size() + " | ";
-		description += " | Nombre d'individus = " +  nbIndividuals;
-		description += " | Nombre de générations = " + nbGenerations;
-		description += " | Probabilité de mutation = " + pMutation;
+		description += " | Nb individus = " +  nbIndividuals;
+		description += " | Nb generations = " + nbGenerations;
+		description += " | P(mutation) = " + pMutation;
+		description += " | Taux différences = " + diffRate;
 		return description;
 	}
 	
