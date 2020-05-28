@@ -69,6 +69,25 @@ public class GeneticAlgorithm {
 		}
 	    displayIndividual(bestIndividual);
     }
+    
+    private void initPopulation() {
+		double minCost = Double.POSITIVE_INFINITY, currCost;
+		ArrayList<Vehicle> minInd = null;
+		ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
+		locationsCopy.remove(Util.getLocationById(0, locationsCopy));
+		for (int i = 0; i < nbIndividuals; i++) {
+	        Collections.shuffle(locationsCopy);
+	        ArrayList<Vehicle> individual = reconstruct(locationsCopy);
+	        population.add(individual);
+	        if ((currCost = objectiveFunction(individual)) < minCost) {
+	        	minCost = currCost;
+	        	minInd = individual;
+	        }
+		}
+		bestCost = minCost;
+		bestIndividual = minInd;
+		bestCostsHistory.put(0, bestCost);
+    }
 	
 	private ArrayList<Vehicle> getRandomButNotBest() {
 		ArrayList<ArrayList<Vehicle>> notBest = new ArrayList<>();
@@ -104,6 +123,10 @@ public class GeneticAlgorithm {
 		}
 	}
 	
+	private boolean areSimilar(double a, double b, double perc) {
+		return Math.abs(a - b) / Math.min(a, b) <= perc;
+	}
+	
 	private ArrayList<Vehicle> getWorst(double cost) {
 		ArrayList<ArrayList<Vehicle>> worst = new ArrayList<>();
 		for (ArrayList<Vehicle> individual : population) {
@@ -114,27 +137,91 @@ public class GeneticAlgorithm {
 		return !worst.isEmpty() ? worst.get(rand.nextInt(worst.size())) : null;
 	}
 	
-	private boolean areSimilar(double a, double b, double perc) {
-		return Math.abs(a - b) / Math.min(a, b) <= perc;
-	}
-	
-	private void initPopulation() {
-		double minCost = Double.POSITIVE_INFINITY, currCost;
-		ArrayList<Vehicle> minInd = null;
-		ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
-		locationsCopy.remove(Util.getLocationById(0, locationsCopy));
-		for (int i = 0; i < nbIndividuals; i++) {
-	        Collections.shuffle(locationsCopy);
-	        ArrayList<Vehicle> individual = reconstruct(locationsCopy);
-	        population.add(individual);
-	        if ((currCost = objectiveFunction(individual)) < minCost) {
-	        	minCost = currCost;
-	        	minInd = individual;
-	        }
+	private ArrayList<Vehicle> descent(ArrayList<Vehicle> individual) {
+    	ArrayList<Vehicle> neighbor;
+    	while ((neighbor = getBestNeighborAndBetter(individual)) != null) {
+    		individual = neighbor;
+    	}
+    	return individual;
+    }
+    
+    private ArrayList<Vehicle> getBestNeighborAndBetter(ArrayList<Vehicle> individual) {
+    	double minCost = objectiveFunction(individual), currCost;
+    	ArrayList<Vehicle> bestInd = null, newInd;
+		ArrayList<Location> routeFrom, routeTo;
+		int routeFromSize, routeToSize;
+		boolean isSameRoute;
+		for (int vFromIdx = 0; vFromIdx < individual.size(); vFromIdx++) {
+			routeFrom = individual.get(vFromIdx).getRoute();
+			routeFromSize = routeFrom.size();
+			for (int vToIdx = vFromIdx; vToIdx < individual.size(); vToIdx++) {
+				routeTo = individual.get(vToIdx).getRoute();
+				routeToSize = routeTo.size();
+				if (!(isSameRoute = (vFromIdx == vToIdx)) 
+						&& individual.get(vFromIdx).getCurrentLoading() + individual.get(vToIdx).getCurrentLoading() > (maxCapacity * 2)) {
+					continue;
+				}
+				for (int locFromIdx = 1; locFromIdx < routeFromSize - (isSameRoute ? 2 : 1); locFromIdx++) {
+					for (int locToIdx = (isSameRoute ? (locFromIdx + 1) : (locFromIdx == routeFromSize - 2 ? 1 : 0)); locToIdx < routeToSize - ((isSameRoute && locFromIdx == 1 || !isSameRoute && locFromIdx == routeFromSize - 2) ? 2 : 1); locToIdx++) {
+						if ((newInd = isSameRoute ? swapTwoOpt(individual, vFromIdx, locFromIdx, locToIdx) 
+								: swapRoutes(individual, routeFrom, routeTo, vFromIdx, vToIdx, locFromIdx, locToIdx)) != null 
+								&& (currCost = objectiveFunction(newInd)) < minCost) {
+							minCost = currCost;
+							bestInd = newInd;
+						}
+					}
+				}
+			}
 		}
-		bestCost = minCost;
-		bestIndividual = minInd;
-		bestCostsHistory.put(0, bestCost);
+		return bestInd;
+	}
+    
+	private ArrayList<Vehicle> swapRoutes(ArrayList<Vehicle> individual, ArrayList<Location> routeFrom, ArrayList<Location> routeTo, int vFromIdx, int vToIdx, int locFromIdx, int locToIdx) {
+		Vehicle newVFrom = new Vehicle(maxCapacity);
+		Vehicle newVTo = new Vehicle(maxCapacity);
+		int i;
+        for (i = 0; i <= locFromIdx; i++) {
+        	newVFrom.routeLocation(routeFrom.get(i));
+        }
+        for (i = locToIdx + 1; i < routeTo.size(); i++) {
+        	if (!newVFrom.routeLocation(routeTo.get(i))) {
+        		return null;
+        	}
+        }
+        
+        for (i = 0; i <= locToIdx; i++) {
+        	newVTo.routeLocation(routeTo.get(i));
+        }
+        for (i = locFromIdx + 1; i < routeFrom.size(); i++) {
+        	if (!newVTo.routeLocation(routeFrom.get(i))) {
+        		return null;
+        	}
+        }
+        ArrayList<Vehicle> newVehicles = Util.createDeepCopyVehicles(individual);
+        newVehicles.set(vFromIdx, newVFrom);
+        newVehicles.set(vToIdx, newVTo);
+		return newVehicles;
+    }
+	
+	private ArrayList<Vehicle> swapTwoOpt(ArrayList<Vehicle> individual, int vIdx, int locFromIdx, int locToIdx) {
+		Vehicle newV = new Vehicle(maxCapacity);
+		ArrayList<Location> route = individual.get(vIdx).getRoute();
+		
+		int i;
+        for (i = 0; i <= locFromIdx - 1; i++) {
+            newV.routeLocation(route.get(i));
+        }
+        int dcr = 0;
+        for (i = locFromIdx; i <= locToIdx; i++) {
+            newV.routeLocation(route.get(locToIdx - dcr));
+            dcr++;
+        }
+        for (i = locToIdx + 1; i < route.size(); i++) {
+        	newV.routeLocation(route.get(i));
+        }
+        ArrayList<Vehicle> newVehicles = Util.createDeepCopyVehicles(individual);
+        newVehicles.set(vIdx, newV);
+        return newVehicles;
     }
 	
 	private void updateBestIndividual(ArrayList<Vehicle> individual, double cost, int i) {
@@ -226,10 +313,6 @@ public class GeneticAlgorithm {
     	return bestIndividual;
     }
     
-    public double getBestCost() {
-    	return bestCost;
-    }
-    
     public TreeMap<Integer, Double> getBestCostsHistory() {
     	return bestCostsHistory;
     }
@@ -238,102 +321,7 @@ public class GeneticAlgorithm {
     	return rand;
     }
     
-    public int getMaxCapacity() {
-    	return maxCapacity;
-    }
-    
-    public ArrayList<Location> getLocations() {
-    	return locations;
-    }
-    
     public int getNbIndividuals() {
     	return nbIndividuals;
-    }
-    
-    private ArrayList<Vehicle> descent(ArrayList<Vehicle> individual) {
-    	ArrayList<Vehicle> neighbor;
-    	while ((neighbor = getBetterNeighbor(individual)) != null) {
-    		individual = neighbor;
-    	}
-    	return individual;
-    }
-    
-    private ArrayList<Vehicle> getBetterNeighbor(ArrayList<Vehicle> individual) {
-    	double minCost = objectiveFunction(individual), currCost;
-    	ArrayList<Vehicle> bestInd = null, newInd;
-		ArrayList<Location> routeFrom, routeTo;
-		int routeFromSize, routeToSize;
-		boolean isSameRoute;
-		for (int vFromIdx = 0; vFromIdx < individual.size(); vFromIdx++) {
-			routeFrom = individual.get(vFromIdx).getRoute();
-			routeFromSize = routeFrom.size();
-			for (int vToIdx = vFromIdx; vToIdx < individual.size(); vToIdx++) {
-				routeTo = individual.get(vToIdx).getRoute();
-				routeToSize = routeTo.size();
-				if (!(isSameRoute = (vFromIdx == vToIdx)) 
-						&& individual.get(vFromIdx).getCurrentLoading() + individual.get(vToIdx).getCurrentLoading() > (maxCapacity * 2)) {
-					continue;
-				}
-				for (int locFromIdx = 1; locFromIdx < routeFromSize - (isSameRoute ? 2 : 1); locFromIdx++) {
-					for (int locToIdx = (isSameRoute ? (locFromIdx + 1) : (locFromIdx == routeFromSize - 2 ? 1 : 0)); locToIdx < routeToSize - ((isSameRoute && locFromIdx == 1 || !isSameRoute && locFromIdx == routeFromSize - 2) ? 2 : 1); locToIdx++) {
-						if ((newInd = isSameRoute ? swapTwoOpt(individual, vFromIdx, locFromIdx, locToIdx) 
-								: swapRoutes(individual, routeFrom, routeTo, vFromIdx, vToIdx, locFromIdx, locToIdx)) != null 
-								&& (currCost = objectiveFunction(newInd)) < minCost) {
-							minCost = currCost;
-							bestInd = newInd;
-						}
-					}
-				}
-			}
-		}
-		return bestInd;
-	}
-    
-	private ArrayList<Vehicle> swapRoutes(ArrayList<Vehicle> individual, ArrayList<Location> routeFrom, ArrayList<Location> routeTo, int vFromIdx, int vToIdx, int locFromIdx, int locToIdx) {
-		Vehicle newVFrom = new Vehicle(maxCapacity);
-		Vehicle newVTo = new Vehicle(maxCapacity);
-		int i;
-        for (i = 0; i <= locFromIdx; i++) {
-        	newVFrom.routeLocation(routeFrom.get(i));
-        }
-        for (i = locToIdx + 1; i < routeTo.size(); i++) {
-        	if (!newVFrom.routeLocation(routeTo.get(i))) {
-        		return null;
-        	}
-        }
-        
-        for (i = 0; i <= locToIdx; i++) {
-        	newVTo.routeLocation(routeTo.get(i));
-        }
-        for (i = locFromIdx + 1; i < routeFrom.size(); i++) {
-        	if (!newVTo.routeLocation(routeFrom.get(i))) {
-        		return null;
-        	}
-        }
-        ArrayList<Vehicle> newVehicles = Util.createDeepCopyVehicles(individual);
-        newVehicles.set(vFromIdx, newVFrom);
-        newVehicles.set(vToIdx, newVTo);
-		return newVehicles;
-    }
-	
-	private ArrayList<Vehicle> swapTwoOpt(ArrayList<Vehicle> individual, int vIdx, int locFromIdx, int locToIdx) {
-		Vehicle newV = new Vehicle(maxCapacity);
-		ArrayList<Location> route = individual.get(vIdx).getRoute();
-		
-		int i;
-        for (i = 0; i <= locFromIdx - 1; i++) {
-            newV.routeLocation(route.get(i));
-        }
-        int dcr = 0;
-        for (i = locFromIdx; i <= locToIdx; i++) {
-            newV.routeLocation(route.get(locToIdx - dcr));
-            dcr++;
-        }
-        for (i = locToIdx + 1; i < route.size(); i++) {
-        	newV.routeLocation(route.get(i));
-        }
-        ArrayList<Vehicle> newVehicles = Util.createDeepCopyVehicles(individual);
-        newVehicles.set(vIdx, newV);
-        return newVehicles;
     }
 }
