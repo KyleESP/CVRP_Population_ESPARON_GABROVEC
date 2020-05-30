@@ -12,16 +12,16 @@ import cvrp_population.Vehicle;
 
 public class CrossoverOperator {
 	
-	private GeneticAlgorithm gen;
+	private GeneticAlgorithm ga;
 	
-	public CrossoverOperator(GeneticAlgorithm gen) {
-		this.gen = gen;
+	public CrossoverOperator(GeneticAlgorithm ga) {
+		this.ga = ga;
 	}
 	
 	public ArrayList<ArrayList<Vehicle>> oXCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {
 		ArrayList<Location> p1Locations = Util.getLocations(p1);
 		ArrayList<Location> p2Locations = Util.getLocations(p2);
-		int firstPoint = gen.getRand().nextInt(p1Locations.size() - 1), secondPoint = gen.getRand().nextInt(p1Locations.size());
+		int firstPoint = ga.getRand().nextInt(p1Locations.size() - 1), secondPoint = ga.getRand().nextInt(p1Locations.size());
 		int minPoint = Math.min(firstPoint, secondPoint), maxPoint = Math.max(firstPoint, secondPoint);
 		ArrayList<Location> child1 = new ArrayList<>(), child2 = new ArrayList<>();
 		child1.addAll(p1Locations.subList(minPoint, maxPoint));
@@ -44,8 +44,8 @@ public class CrossoverOperator {
 		Collections.rotate(child1, minPoint);
 		Collections.rotate(child2, minPoint);
 		ArrayList<ArrayList<Vehicle>> childs = new ArrayList<>();
-		childs.add(gen.reconstruct(child1));
-		childs.add(gen.reconstruct(child2));
+		childs.add(ga.reconstruct(child1));
+		childs.add(ga.reconstruct(child2));
 		
 		return childs;
 	}
@@ -60,7 +60,7 @@ public class CrossoverOperator {
 		HashMap<Integer, HashMap<Integer, Double>> distances = Util.getDistances();
 		
 		ArrayList<Integer> child = new ArrayList<>();
-		int randStart = gen.getRand().nextInt(p1Locations.size() - 1);
+		int randStart = ga.getRand().nextInt(p1Locations.size() - 1);
 		child.add(p1Locations.get(randStart).getId());
 		int lastLocId = p1Locations.get(randStart + 1).getId();
 		child.add(lastLocId);
@@ -87,7 +87,7 @@ public class CrossoverOperator {
 			child.add(lastLocId);
 		}
 		
-		return gen.reconstruct(child);
+		return ga.reconstruct(child);
 	}
 	
 	private HashMap<int[], Double> getEdgesCosts(ArrayList<Location> locations) {

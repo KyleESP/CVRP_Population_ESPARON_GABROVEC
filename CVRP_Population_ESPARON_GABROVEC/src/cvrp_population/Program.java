@@ -1,6 +1,7 @@
 package cvrp_population;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class Program {
 	
@@ -18,7 +19,11 @@ public class Program {
 	private static final boolean IS_HYBRID = true;
 	
 	public static void main(String[] args) {
-		//test(10, new String[] {"A3205.txt","A3305.txt"});
+		ArrayList<Object[]> parametersTest = new ArrayList<>();
+		// Object = [file, nbExec, nbGenerations, nbIndividuals]
+		parametersTest.add(new Object[] {"A3306.txt", 15, 350, 15});
+		test(parametersTest);
+		/*
  	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE);
 	    
 	    GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, 
@@ -29,35 +34,44 @@ public class Program {
         String parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
         Util.drawGraph("Graphe CVRP Population", parametersDesc, descGA, ga.getBestIndividual(), true);
         Util.drawLineChart("Line chart CVRP Population", parametersDesc, descGA, ga.getBestCostsHistory());
+        */
     }
 	
-	private static void test(int nbExec, String[] files) {
+	private static void test(ArrayList<Object[]> parameters) {
 		ArrayList<String> results = new ArrayList<>();
 		ArrayList<Location> locations;
-		String descGA, parametersDesc;
-		GeneticAlgorithm bestGA;
+		ArrayList<Vehicle> bestIndividual = null;
+		TreeMap<Integer, Double> bestOfBestCostsHistory = new TreeMap<>();
 		double bestCost, currBestCost, mean;
-		for (String file : files) {
+		String file, parametersDesc, bestInlineDescription = "";
+		int nbExec, nbGenerations, nbIndividuals;
+		for (Object[] p : parameters) {
+			file = (String)p[0];
+			nbExec = (int)p[1];
+			nbGenerations = (int)p[2];
+			nbIndividuals = (int)p[3];
 			bestCost = Double.POSITIVE_INFINITY;
-			bestGA = null;
 			mean = 0;
-			locations = Util.readData("data/" + file);
-			GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, 
+			locations = Util.readData("data/" + (String)p[0]);
+			GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, nbGenerations, nbIndividuals, 
 		    		P_MUTATION, DIFF_RATE, IS_TOURNAMENT, IS_HGREX, IS_HYBRID);
 			for (int i = 0; i < nbExec; i++) {
 				ga.exec();
 				mean += (currBestCost = ga.getBestCost());
 				if (currBestCost < bestCost) {
-					bestGA = ga;
+					bestIndividual = Util.createDeepCopyIndividual(ga.getBestIndividual());
+					bestOfBestCostsHistory.clear();
+					bestOfBestCostsHistory.putAll(ga.getBestCostsHistory());
+					bestInlineDescription = ga.getInlineDescription();
 					bestCost = currBestCost;
 				}
 			}
 			mean /= nbExec;
-			results.add(file + " -> " + mean);
-			descGA = bestGA.getInlineDescription();
+			results.add(file + ", nbExec = " + nbExec + ", nbGen = " + nbGenerations + 
+					", nbIndi = " + nbIndividuals + " --> " + "Moyenne = " + mean);
 	        parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
-	        Util.drawGraph("Graphe CVRP Population", parametersDesc, descGA, bestGA.getBestIndividual(), false);
-	        Util.drawLineChart("Line chart CVRP Population", parametersDesc, descGA, bestGA.getBestCostsHistory());
+	        Util.drawGraph("Graphe CVRP Population", parametersDesc, bestInlineDescription, bestIndividual, false);
+	        Util.drawLineChart("Line chart CVRP Population", parametersDesc, bestInlineDescription, bestOfBestCostsHistory);
 		}
 		for (String s : results) {
 			System.out.println(s);

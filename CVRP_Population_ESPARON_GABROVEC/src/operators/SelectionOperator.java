@@ -7,21 +7,21 @@ import cvrp_population.Vehicle;
 
 public class SelectionOperator {
 	
-	private GeneticAlgorithm gen;
+	private GeneticAlgorithm ga;
 	
-	public SelectionOperator(GeneticAlgorithm gen) {
-		this.gen = gen;
+	public SelectionOperator(GeneticAlgorithm ga) {
+		this.ga = ga;
 	}
 	
 	public ArrayList<ArrayList<Vehicle>> tournamentSelection(int nbParticipants) {
-		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants), population = gen.getPopulation();
+		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants), population = ga.getPopulation();
 		ArrayList<Vehicle> participant;
 		ArrayList<Double> costs = new ArrayList<>();
 		double totalCost = 0, cost;
 		for (int i = 0; i < nbParticipants; i++) {
-			participant = population.get(gen.getRand().nextInt(population.size()));
+			participant = population.get(ga.getRand().nextInt(population.size()));
 			participants.add(participant);
-			cost = gen.objectiveFunction(participant);
+			cost = ga.objectiveFunction(participant);
 			costs.add(cost);
 			totalCost += cost;
 		}
@@ -35,15 +35,15 @@ public class SelectionOperator {
 	public ArrayList<ArrayList<Vehicle>> rouletteWheelSelection() {
 		ArrayList<Double> costs = new ArrayList<>();
 		double totalCost = 0, cost;
-		for (ArrayList<Vehicle> individual : gen.getPopulation()) {
-			cost = gen.objectiveFunction(individual);
+		for (ArrayList<Vehicle> individual : ga.getPopulation()) {
+			cost = ga.objectiveFunction(individual);
 			costs.add(cost);
 			totalCost += cost;
 		}
 		ArrayList<double[]> rouletteWheel = getProbasRepartition(costs, totalCost);
 		ArrayList<ArrayList<Vehicle>> winners = new ArrayList<>();
-		winners.add(getWinner(rouletteWheel, gen.getPopulation()));
-		winners.add(getWinner(rouletteWheel, gen.getPopulation()));
+		winners.add(getWinner(rouletteWheel, ga.getPopulation()));
+		winners.add(getWinner(rouletteWheel, ga.getPopulation()));
 		return winners;
 	}
 	
@@ -65,7 +65,7 @@ public class SelectionOperator {
 	private ArrayList<Vehicle> getWinner(ArrayList<double[]> probasRepartition, ArrayList<ArrayList<Vehicle>> participants) {
 		double[] interval;
 		ArrayList<Vehicle> winner = null;
-		double p = gen.getRand().nextDouble();
+		double p = ga.getRand().nextDouble();
 		for (int j = 0; j < probasRepartition.size(); j++) {
 			interval = probasRepartition.get(j);
 			if (p >= interval[0] && p < interval[1]) {
