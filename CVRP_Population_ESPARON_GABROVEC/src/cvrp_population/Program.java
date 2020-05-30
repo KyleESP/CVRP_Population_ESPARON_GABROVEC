@@ -69,7 +69,8 @@ public class Program {
 			mean /= nbExec;
 			results.add(file + ", nbExec = " + nbExec + ", nbGen = " + nbGenerations + 
 					", nbIndi = " + nbIndividuals + " --> " + "Moyenne = " + mean);
-	        parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
+	        parametersDesc = "Fichier : " + file + " | Nombre de clients : " + (locations.size() - 1) 
+	        		+ " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
 	        Util.drawGraph("Graphe CVRP Population", parametersDesc, bestInlineDescription, bestIndividual, false);
 	        Util.drawLineChart("Line chart CVRP Population", parametersDesc, bestInlineDescription, bestOfBestCostsHistory);
 		}
