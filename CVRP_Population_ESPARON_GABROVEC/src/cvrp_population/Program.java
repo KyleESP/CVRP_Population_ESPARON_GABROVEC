@@ -11,10 +11,10 @@ public class Program {
 	
 	private static final long NB_GENERATIONS = 300;
 	private static final int NB_INDIVIDUALS = 10;
+	private static final double P_MUTATION = 0.01;
 	private static final double DIFF_RATE = 0.01;
 	private static final boolean IS_TOURNAMENT = true;
 	private static final boolean IS_HGREX = true;
-	private static final double P_MUTATION = 0.01;
 	private static final boolean IS_HYBRID = true;
 	
 	public static void main(String[] args) {
