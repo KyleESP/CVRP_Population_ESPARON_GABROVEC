@@ -21,7 +21,11 @@ public class Program {
 	public static void main(String[] args) {
 		ArrayList<Object[]> parametersTest = new ArrayList<>();
 		// Object = [file, nbExec, nbGenerations, nbIndividuals]
-		parametersTest.add(new Object[] {"A3306.txt", 15, 350, 15});
+		//parametersTest.add(new Object[] {"A3205.txt", 3, 300, 20});
+		//parametersTest.add(new Object[] {"A3705.txt", 3, 500, 20});
+		//parametersTest.add(new Object[] {"A6109.txt", 3, 500, 30});
+		//parametersTest.add(new Object[] {"A6409.txt", 3, 800, 30});
+		//parametersTest.add(new Object[] {"A8010.txt", 3, 4000, 50});
 		test(parametersTest);
 		/*
  	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE);
@@ -31,7 +35,7 @@ public class Program {
         ga.exec();
         
         String descGA = ga.getInlineDescription();
-        String parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacitï¿½ maximale des vï¿½hicules : " + MAX_VEHICLES_CAPACITY;
+        String parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
         Util.drawGraph("Graphe CVRP Population", parametersDesc, descGA, ga.getBestIndividual(), true);
         Util.drawLineChart("Line chart CVRP Population", parametersDesc, descGA, ga.getBestCostsHistory());
         */
@@ -70,7 +74,7 @@ public class Program {
 			results.add(file + ", nbExec = " + nbExec + ", nbGen = " + nbGenerations + 
 					", nbIndi = " + nbIndividuals + " --> " + "Moyenne = " + mean);
 	        parametersDesc = "Fichier : " + file + " | Nombre de clients : " + (locations.size() - 1) 
-	        		+ " | Capacitï¿½ maximale des vï¿½hicules : " + MAX_VEHICLES_CAPACITY;
+	        		+ " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
 	        Util.drawGraph("Graphe CVRP Population", parametersDesc, bestInlineDescription, bestIndividual, false);
 	        Util.drawLineChart("Line chart CVRP Population", parametersDesc, bestInlineDescription, bestOfBestCostsHistory);
 		}
