@@ -3,12 +3,13 @@ package cvrp_population;
 import java.util.ArrayList;
 
 public class Program {
+	
 	// A3205, A3305, A3306, ..., A6509, A6909, A8010
 	private static final String DATA_FILE = "A3205.txt";
 	
 	private static final int MAX_VEHICLES_CAPACITY = 100;
 	
-	private static final long NB_GENERATIONS = 200;
+	private static final long NB_GENERATIONS = 300;
 	private static final int NB_INDIVIDUALS = 10;
 	private static final double P_MUTATION = 0.01;
 	private static final double DIFF_RATE = 0.01;

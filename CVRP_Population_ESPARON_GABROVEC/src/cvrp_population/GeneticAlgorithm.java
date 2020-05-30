@@ -72,8 +72,7 @@ public class GeneticAlgorithm {
 				updateBestIndividual(mutant, objectiveFunction(mutant), i);
 			}
 			if ((newPercentage = (int)(((double)(i + 1) / nbGenerations) * 100)) != percentage) {
-				percentage = newPercentage;
-				System.out.println(percentage + "%");
+				System.out.println((percentage = newPercentage) + "%");
 			}
 		}
 	    displayIndividual(bestIndividual);
