@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 public class Program {
 	
-	// A3205, A3305, A3306, ..., A6509, A6909, A8010
+	// A3205, A3705, A6109, A6409, A8010...
 	private static final String DATA_FILE = "A3205.txt";
 	
 	private static final int MAX_VEHICLES_CAPACITY = 100;
@@ -31,7 +31,7 @@ public class Program {
         ga.exec();
         
         String descGA = ga.getInlineDescription();
-        String parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
+        String parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacitï¿½ maximale des vï¿½hicules : " + MAX_VEHICLES_CAPACITY;
         Util.drawGraph("Graphe CVRP Population", parametersDesc, descGA, ga.getBestIndividual(), true);
         Util.drawLineChart("Line chart CVRP Population", parametersDesc, descGA, ga.getBestCostsHistory());
         */
@@ -70,7 +70,7 @@ public class Program {
 			results.add(file + ", nbExec = " + nbExec + ", nbGen = " + nbGenerations + 
 					", nbIndi = " + nbIndividuals + " --> " + "Moyenne = " + mean);
 	        parametersDesc = "Fichier : " + file + " | Nombre de clients : " + (locations.size() - 1) 
-	        		+ " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
+	        		+ " | Capacitï¿½ maximale des vï¿½hicules : " + MAX_VEHICLES_CAPACITY;
 	        Util.drawGraph("Graphe CVRP Population", parametersDesc, bestInlineDescription, bestIndividual, false);
 	        Util.drawLineChart("Line chart CVRP Population", parametersDesc, bestInlineDescription, bestOfBestCostsHistory);
 		}
