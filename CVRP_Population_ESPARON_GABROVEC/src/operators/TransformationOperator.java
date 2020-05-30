@@ -15,7 +15,7 @@ public class TransformationOperator {
 		this.gen = gen;
 	}
 	
-	public ArrayList<Vehicle> swapRoutes(ArrayList<Vehicle> individual, ArrayList<Location> routeFrom, ArrayList<Location> routeTo, int vFromIdx, int vToIdx, int locFromIdx, int locToIdx) {
+	public ArrayList<Vehicle> swapTransformation(ArrayList<Vehicle> individual, ArrayList<Location> routeFrom, ArrayList<Location> routeTo, int vFromIdx, int vToIdx, int locFromIdx, int locToIdx) {
 		Vehicle newVFrom = new Vehicle(gen.getMaxCapacity());
 		Vehicle newVTo = new Vehicle(gen.getMaxCapacity());
 		int i;
@@ -42,7 +42,7 @@ public class TransformationOperator {
 		return newIndividual;
     }
 	
-	public ArrayList<Vehicle> swapTwoOpt(ArrayList<Vehicle> individual, int vIdx, int locFromIdx, int locToIdx) {
+	public ArrayList<Vehicle> twoOptTransformation(ArrayList<Vehicle> individual, int vIdx, int locFromIdx, int locToIdx) {
 		Vehicle newV = new Vehicle(gen.getMaxCapacity());
 		ArrayList<Location> route = individual.get(vIdx).getRoute();
 		

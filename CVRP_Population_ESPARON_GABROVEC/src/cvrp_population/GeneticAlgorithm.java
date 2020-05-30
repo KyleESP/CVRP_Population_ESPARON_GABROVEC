@@ -53,8 +53,8 @@ public class GeneticAlgorithm {
 		ArrayList<Vehicle> p1, p2, c;
 		ArrayList<Vehicle> randomInd, mutant;
 		for (int i = 1; i <= nbGenerations; i++) {
-			p1 = selectionOperator.tournament(3);
-			p2 = selectionOperator.tournament(3);
+			p1 = selectionOperator.tournamentSelection(3);
+			p2 = selectionOperator.tournamentSelection(3);
 			c = crossoverOperator.hGreXCrossover(p1, p2);
 			if (descent) {
 				c = descent(c);
@@ -171,8 +171,8 @@ public class GeneticAlgorithm {
 				}
 				for (int locFromIdx = 1; locFromIdx < routeFromSize - (isSameRoute ? 2 : 1); locFromIdx++) {
 					for (int locToIdx = (isSameRoute ? (locFromIdx + 1) : (locFromIdx == routeFromSize - 2 ? 1 : 0)); locToIdx < routeToSize - ((isSameRoute && locFromIdx == 1 || !isSameRoute && locFromIdx == routeFromSize - 2) ? 2 : 1); locToIdx++) {
-						if ((newInd = isSameRoute ? transformationOperator.swapTwoOpt(individual, vFromIdx, locFromIdx, locToIdx) 
-								: transformationOperator.swapRoutes(individual, routeFrom, routeTo, vFromIdx, vToIdx, locFromIdx, locToIdx)) != null 
+						if ((newInd = isSameRoute ? transformationOperator.twoOptTransformation(individual, vFromIdx, locFromIdx, locToIdx) 
+								: transformationOperator.swapTransformation(individual, routeFrom, routeTo, vFromIdx, vToIdx, locFromIdx, locToIdx)) != null 
 								&& (currCost = objectiveFunction(newInd)) < minCost) {
 							minCost = currCost;
 							bestInd = newInd;
@@ -241,10 +241,10 @@ public class GeneticAlgorithm {
 	public String getInlineDescription() {
 		String description = "Coût final = " + (double) Math.round(bestCost * 1000) / 1000;
 		description += " | Nb véhicules = " + bestIndividual.size() + " | ";
-		description += " | Nb idv = " +  nbIndividuals;
-		description += " | Nb gen = " + nbGenerations;
+		description += " | Nb indvs = " +  nbIndividuals;
+		description += " | Nb gens = " + nbGenerations;
 		description += " | P(mutation) = " + pMutation;
-		description += " | Taux diff = " + diffRate;
+		description += " | Taux diffs = " + diffRate;
 		description += " | Descente = " + (descent ? "Oui" : "Non");
 		return description;
 	}

@@ -22,7 +22,7 @@ public class Program {
         ga.exec();
         
         String descGA = "Algorithme génétique (" + ga.getInlineDescription() + ")";
-        String parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de locations : " + locations.size() + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
+        String parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
         Util.drawGraph("Graphe CVRP Population", parametersDesc, descGA, ga.getBestIndividual());
         Util.drawLineChart("Line chart CVRP Population", parametersDesc, descGA, ga.getBestCostsHistory());
     }

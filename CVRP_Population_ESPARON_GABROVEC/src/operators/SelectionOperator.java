@@ -13,7 +13,7 @@ public class SelectionOperator {
 		this.gen = gen;
 	}
 	
-	public ArrayList<Vehicle> tournament(int nbParticipants) {
+	public ArrayList<Vehicle> tournamentSelection(int nbParticipants) {
 		ArrayList<ArrayList<Vehicle>> participants = new ArrayList<>(nbParticipants), population = gen.getPopulation();
 		ArrayList<Vehicle> participant;
 		ArrayList<Double> costs = new ArrayList<>();
@@ -28,7 +28,7 @@ public class SelectionOperator {
 		return getWinner(getProbasRepartition(costs, totalCost), participants);
 	}
 	
-	public ArrayList<ArrayList<Vehicle>> rouletteWheel() {
+	public ArrayList<ArrayList<Vehicle>> rouletteWheelSelection() {
 		ArrayList<Double> costs = new ArrayList<>();
 		double totalCost = 0, cost;
 		for (ArrayList<Vehicle> individual : gen.getPopulation()) {
