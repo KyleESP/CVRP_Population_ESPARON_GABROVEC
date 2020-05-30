@@ -18,6 +18,7 @@ public class Program {
 	private static final boolean IS_HYBRID = true;
 	
 	public static void main(String[] args) {
+		//test(10, new String[] {"A3205.txt","A3305.txt"});
  	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE);
 	    
 	    GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, 
@@ -26,8 +27,40 @@ public class Program {
         
         String descGA = ga.getInlineDescription();
         String parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
-        Util.drawGraph("Graphe CVRP Population", parametersDesc, descGA, ga.getBestIndividual());
+        Util.drawGraph("Graphe CVRP Population", parametersDesc, descGA, ga.getBestIndividual(), true);
         Util.drawLineChart("Line chart CVRP Population", parametersDesc, descGA, ga.getBestCostsHistory());
     }
-
+	
+	private static void test(int nbExec, String[] files) {
+		ArrayList<String> results = new ArrayList<>();
+		ArrayList<Location> locations;
+		String descGA, parametersDesc;
+		GeneticAlgorithm bestGA;
+		double bestCost, currBestCost, mean;
+		for (String file : files) {
+			bestCost = Double.POSITIVE_INFINITY;
+			bestGA = null;
+			mean = 0;
+			locations = Util.readData("data/" + file);
+			GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, 
+		    		P_MUTATION, DIFF_RATE, IS_TOURNAMENT, IS_HGREX, IS_HYBRID);
+			for (int i = 0; i < nbExec; i++) {
+				ga.exec();
+				mean += (currBestCost = ga.getBestCost());
+				if (currBestCost < bestCost) {
+					bestGA = ga;
+					bestCost = currBestCost;
+				}
+			}
+			mean /= nbExec;
+			results.add(file + " -> " + mean);
+			descGA = bestGA.getInlineDescription();
+	        parametersDesc = "Fichier : " + DATA_FILE + " | Nombre de clients : " + (locations.size() - 1) + " | Capacité maximale des véhicules : " + MAX_VEHICLES_CAPACITY;
+	        Util.drawGraph("Graphe CVRP Population", parametersDesc, descGA, bestGA.getBestIndividual(), false);
+	        Util.drawLineChart("Line chart CVRP Population", parametersDesc, descGA, bestGA.getBestCostsHistory());
+		}
+		for (String s : results) {
+			System.out.println(s);
+		}
+	}
 }

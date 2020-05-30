@@ -52,6 +52,7 @@ public class GeneticAlgorithm {
 	}
 	
     public void exec() {
+    	bestCostsHistory.clear();
     	initPopulation();
 		displayDescription();
 		int percentage = -1, newPercentage;
@@ -88,6 +89,7 @@ public class GeneticAlgorithm {
     }
     
     private void initPopulation() {
+    	population.clear();
 		double minCost = Double.POSITIVE_INFINITY, currCost;
 		ArrayList<Vehicle> minInd = null, individual;
 		ArrayList<Location> locationsCopy = Util.createDeepCopyLocations(locations);
@@ -285,6 +287,10 @@ public class GeneticAlgorithm {
     
     public ArrayList<Vehicle> getBestIndividual() {
     	return bestIndividual;
+    }
+    
+    public double getBestCost() {
+    	return bestCost;
     }
     
     public int getMaxCapacity() {
