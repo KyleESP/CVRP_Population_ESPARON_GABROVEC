@@ -18,15 +18,12 @@ public class CrossoverOperator {
 		this.gen = gen;
 	}
 	
-	public ArrayList<ArrayList<Vehicle>> oxCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {
+	public ArrayList<ArrayList<Vehicle>> oXCrossover(ArrayList<Vehicle> p1, ArrayList<Vehicle> p2) {
 		ArrayList<Location> p1Locations = Util.getLocations(p1);
 		ArrayList<Location> p2Locations = Util.getLocations(p2);
-		int firstPoint = gen.getRand().nextInt(p1Locations.size() - 1);
-		int secondPoint = gen.getRand().nextInt(p1Locations.size());
-		int minPoint = Math.min(firstPoint, secondPoint);
-		int maxPoint = Math.max(firstPoint, secondPoint);
-		ArrayList<Location> child1 = new ArrayList<>();
-		ArrayList<Location> child2 = new ArrayList<>();
+		int firstPoint = gen.getRand().nextInt(p1Locations.size() - 1), secondPoint = gen.getRand().nextInt(p1Locations.size());
+		int minPoint = Math.min(firstPoint, secondPoint), maxPoint = Math.max(firstPoint, secondPoint);
+		ArrayList<Location> child1 = new ArrayList<>(), child2 = new ArrayList<>();
 		child1.addAll(p1Locations.subList(minPoint, maxPoint));
 		child2.addAll(p2Locations.subList(minPoint, maxPoint));
 		

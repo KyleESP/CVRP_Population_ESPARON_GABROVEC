@@ -57,11 +57,12 @@ public abstract class Util {
 	private static void initDistances(ArrayList<Location> locations) {
     	distances = new HashMap<>();
     	int nbCustomers = locations.size();
+    	double distance;
     	for (int i = 0; i < nbCustomers - 1; i++) {
             for (int j = i + 1; j < nbCustomers; j++) {
-                double distance = Math.sqrt(Math.pow(locations.get(i).getX() - locations.get(j).getX(), 2) + Math.pow(locations.get(i).getY() - locations.get(j).getY(), 2));
+                distance = Math.sqrt(Math.pow(locations.get(i).getX() - locations.get(j).getX(), 2) + Math.pow(locations.get(i).getY() - locations.get(j).getY(), 2));
                 addDistance(locations.get(i).getId(), locations.get(j).getId(), distance);
-                addDistance(locations.get(j).getId(),locations.get(i).getId(), distance);
+                addDistance(locations.get(j).getId(), locations.get(i).getId(), distance);
             }
         }
     }

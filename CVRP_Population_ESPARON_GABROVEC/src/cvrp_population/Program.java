@@ -11,16 +11,17 @@ public class Program {
 	
 	private static final long NB_GENERATIONS = 300;
 	private static final int NB_INDIVIDUALS = 10;
-	private static final double P_MUTATION = 0.01;
 	private static final double DIFF_RATE = 0.01;
 	private static final boolean IS_TOURNAMENT = true;
+	private static final boolean IS_HGREX = true;
+	private static final double P_MUTATION = 0.01;
 	private static final boolean IS_HYBRID = true;
 	
 	public static void main(String[] args) {
  	    ArrayList<Location> locations = Util.readData("data/" + DATA_FILE);
 	    
 	    GeneticAlgorithm ga = new GeneticAlgorithm(locations, MAX_VEHICLES_CAPACITY, NB_GENERATIONS, NB_INDIVIDUALS, 
-	    		P_MUTATION, DIFF_RATE, IS_TOURNAMENT, IS_HYBRID);
+	    		P_MUTATION, DIFF_RATE, IS_TOURNAMENT, IS_HGREX, IS_HYBRID);
         ga.exec();
         
         String descGA = ga.getInlineDescription();

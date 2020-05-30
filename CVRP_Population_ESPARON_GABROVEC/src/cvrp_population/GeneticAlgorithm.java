@@ -22,6 +22,7 @@ public class GeneticAlgorithm {
 	private int maxCapacity;
 	private double diffRate;
 	private boolean isTournament;
+	private boolean isHGreX;
 	private boolean isHybrid;
 	private ArrayList<Location> locations;
 	private ArrayList<ArrayList<Vehicle>> population;
@@ -31,13 +32,14 @@ public class GeneticAlgorithm {
 	private Random rand;
 	
 	public GeneticAlgorithm(ArrayList<Location> locations, int maxCapacity, long nbGenerations, int nbIndividuals, 
-			double pMutation, double diffRate, boolean isTournament, boolean isHybrid) {
+			double pMutation, double diffRate, boolean isTournament, boolean isHGreX, boolean isHybrid) {
     	this.maxCapacity = maxCapacity;
     	this.nbGenerations = nbGenerations;
     	this.nbIndividuals = nbIndividuals;
     	this.pMutation = pMutation;
     	this.diffRate = diffRate;
     	this.isTournament = isTournament;
+    	this.isHGreX = isHGreX;
     	this.isHybrid = isHybrid;
     	population = new ArrayList<>(nbIndividuals);
     	this.locations = locations;
@@ -54,17 +56,20 @@ public class GeneticAlgorithm {
 		displayDescription();
 		int percentage = -1, newPercentage;
 		ArrayList<Vehicle> p1, p2, c, randomInd, mutant;
-		ArrayList<ArrayList<Vehicle>> selectedParents;
+		ArrayList<ArrayList<Vehicle>> selectedParents, childsOX;
 		for (int i = 1; i <= nbGenerations; i++) {
 			selectedParents = isTournament ? selectionOperator.tournamentSelection(3) : selectionOperator.rouletteWheelSelection();
 			p1 = selectedParents.get(0);
 			p2 = selectedParents.get(1);
-			c = crossoverOperator.hGreXCrossover(p1, p2);
-			if (isHybrid) {
-				c = descent(c);
+			if (isHGreX) {
+				c = crossoverOperator.hGreXCrossover(p1, p2);
+			} else {
+				childsOX = crossoverOperator.oXCrossover(p1, p2);
+				c = childsOX.get(0);
+				addConsideringSimilarities(isHybrid ? descent(childsOX.get(1)) : childsOX.get(1), i);
 			}
-			addConsideringSimilarities(c, i);
-			if (rand.nextDouble() < pMutation) {
+			addConsideringSimilarities(isHybrid ? descent(c) : c, i);
+			if (pMutation != 0 && rand.nextDouble() < pMutation) {
 				randomInd = getRandomIndividualButNotBest();
 				mutant = rand.nextDouble() < 0.5 ? mutationOperator.inversionMutation(randomInd) 
 						: mutationOperator.displacementMutation(randomInd);
@@ -235,9 +240,10 @@ public class GeneticAlgorithm {
 		description += "\nNombre de générations = " + nbGenerations;
 		description += "\nNombre d'individus = " + nbIndividuals;
 		description += "\nProbabilité de mutation = " + pMutation;
-		description += "\nTaux de différences = " + diffRate;
+		description += "\nTaux de différence = " + diffRate;
 		description += "\nOpérateur de sélection = " + (isTournament ? "Tournoi" : "Roulette");
-		description += "\nMéthode de descente = " + (isHybrid ? "Oui" : "Non");
+		description += "\nOpérateur de croisement = " + (isHGreX ? "HGreX" : "OX");
+		description += "\n" + (isHybrid ? "Hybride" : "Non-Hybride");
 		System.out.println(description);
 		System.out.println("----------------------------------------------------------------------------------------------------");
 	}
@@ -248,9 +254,10 @@ public class GeneticAlgorithm {
 		description += " | Nb indvs = " +  nbIndividuals;
 		description += " | Nb gens = " + nbGenerations;
 		description += " | P(mutation) = " + pMutation;
-		description += " | Taux diffs = " + diffRate;
+		description += " | Taux diff = " + diffRate;
 		description += " | S = " + (isTournament ? "Tournoi" : "Roulette");
-		description += " | Descente = " + (isHybrid ? "Oui" : "Non");
+		description += " | C = " + (isHGreX ? "HGreX" : "OX");
+		description += " | " + (isHybrid ? "Hybride" : "Non-Hybride");
 		return description;
 	}
 	
