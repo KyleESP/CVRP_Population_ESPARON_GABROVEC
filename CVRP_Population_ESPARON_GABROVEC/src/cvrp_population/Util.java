@@ -100,7 +100,7 @@ public abstract class Util {
 		return locations;
 	}
     
-	public static void drawGraph(String title, String parametersDesc, String desc, ArrayList<Vehicle> individual, boolean exitOnClose) {
+	public static void drawGraph(String title, String parametersDesc, String desc, ArrayList<Vehicle> individual) {
 		JFrame frame = new JFrame(title);
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.WHITE);
@@ -109,9 +109,7 @@ public abstract class Util {
     	Border border = BorderFactory.createTitledBorder(desc);
     	graph.setBorder(border);
     	mainPanel.add(graph);
-    	if (exitOnClose) {
-    		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    	}
+    	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.add(mainPanel);
         frame.pack();
